@@ -1,37 +1,37 @@
 # TODO — adit-agent
 
-## Selesai di v0.4.2
+## Selesai di 0.4.2
 
 - [x] **Rename istilah "channel" -> "Synology Chat"**: `SynologyChannel` →
   `SynologyChatListener`, `SynologyBot` → `SynologyChatBot` (rename murni,
-  tanpa perubahan perilaku). Lihat `CHANGELOG.md` v0.4.2.
+  tanpa perubahan perilaku). Lihat `CHANGELOG.md` 0.4.2.
 
-## Selesai di v0.4.1
+## Selesai di 0.4.1
 
 - [x] **`user_ids` untuk Bot Synology (`method=chatbot`)**: `SynologyChatBot`
   sekarang mendukung `SYNOLOGY_REPLY_TO_USER` (default `false`, backward
   compatible) untuk menyertakan `user_ids` di payload saat
   `SYNOLOGY_INCOMING_WEBHOOK_URL` adalah URL Bot, bukan Incoming Webhook
-  polos. Lihat `CHANGELOG.md` v0.4.1. Listener (`SynologyChatListener`) tidak
+  polos. Lihat `CHANGELOG.md` 0.4.1. Listener (`SynologyChatListener`) tidak
   perlu ikut dipecah — formatnya sama untuk kedua mode kirim.
 
-## Selesai di v0.4
+## Selesai di 0.4.0
 
 - [x] **Pisah "channel" (listener) dan "bot" (sender) Synology jadi dua
   concern eksplisit**: `SynologyAdapter` sekarang cuma delegasi tipis ke
   `SynologyChatListener` (`app/channels/synology_chat_listener.py`, verifikasi token +
   `parse_request()`) dan `SynologyChatBot` (`app/channels/synology_chat_bot.py`,
   format payload + `send_reply()`). Kontrak `ChannelAdapter` yang dipakai
-  `main.py`/`orchestrator.py` tidak berubah. Lihat `CHANGELOG.md` v0.4 untuk
+  `main.py`/`orchestrator.py` tidak berubah. Lihat `CHANGELOG.md` 0.4.0 untuk
   detail verifikasi.
 
-## Selesai di v0.3
+## Selesai di 0.3.0
 
-- [x] **Bugfix format Incoming Webhook**: lihat `CHANGELOG.md` v0.3 —
+- [x] **Bugfix format Incoming Webhook**: lihat `CHANGELOG.md` 0.3.0 —
   `send_reply()` sekarang kirim `application/x-www-form-urlencoded` dengan
   field `payload` (string JSON), bukan `application/json` mentah.
 
-## Selesai di v0.2
+## Selesai di 0.2.0
 
 - [x] **Arsitektur adapter per channel**: refactor `app/synology.py` jadi
   `app/channels/synology.py` yang mengimplementasikan `ChannelAdapter`
@@ -50,7 +50,7 @@
   cek: format form field yang benar-benar dikirim Synology (nama field bisa
   sedikit berbeda antar versi DSM), dan apakah balasan JSON ACK benar-benar
   langsung muncul di UI chat. **Prioritasnya naik** setelah bug `payload` di
-  v0.3 — tanda bahwa asumsi format API pihak ketiga sebaiknya dicek ke
+  0.3.0 — tanda bahwa asumsi format API pihak ketiga sebaiknya dicek ke
   Synology sungguhan, bukan cuma dokumentasi/simulasi, sebelum dianggap final.
 - [ ] **Riwayat percakapan multi-turn**: saat ini tiap pesan dikirim
   single-turn (`messages` cuma berisi 1 pesan user), jadi model tidak
@@ -87,10 +87,10 @@
   mis. tombol quick-reply alih-alih user harus ngetik ulang.
 - [ ] **Test otomatis (`pytest` + `TestClient`) disimpan permanen**: saat ini
   verifikasi sudah dilakukan manual lewat script ad-hoc tiap kali ada
-  perubahan (termasuk setelah refactor adapter di v0.2), belum jadi bagian
+  perubahan (termasuk setelah refactor adapter di 0.2.0), belum jadi bagian
   test suite repo (`tests/test_webhook.py`, `tests/channels/test_synology.py`).
-  Sekarang strukturnya sudah pluggable (dan sejak v0.4, `SynologyChatListener`/
-  `SynologyChatBot` bisa dites terpisah -- lihat `CHANGELOG.md` v0.4), ini jadi
+  Sekarang strukturnya sudah pluggable (dan sejak 0.4.0, `SynologyChatListener`/
+  `SynologyChatBot` bisa dites terpisah -- lihat `CHANGELOG.md` 0.4.0), ini jadi
   lebih penting supaya channel baru bisa dites tanpa harus jalankan manual
   tiap kali.
 
