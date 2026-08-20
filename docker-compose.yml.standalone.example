@@ -1,0 +1,19 @@
+# Standalone adit-agent tanpa adit-server (adit-server dijalankan terpisah).
+#
+# Gunakan konfigurasi ini kalau adit-server sudah jalan di URL lain
+# (misalnya di server Synology, VPS, atau mesin lokal yang berbeda).
+#
+# Set ADIT_BASE_URL di file .env atau di bagian environment di bawah
+# supaya menunjuk ke URL adit-server yang sudah berjalan.
+# Isi SYNOLOGY_OUTGOING_TOKEN dan SYNOLOGY_INCOMING_WEBHOOK_URL
+# di file .env (salin dari .env.example) sebelum `docker compose up`.
+
+services:
+  adit-agent:
+    image: endsho/adit-agent:latest
+    container_name: adit-agent
+    env_file: .env
+    environment:
+      ADIT_BASE_URL: http://host.docker.internal:8000  # ganti dengan URL adit-server Anda
+    ports:
+      - "9000:9000"
