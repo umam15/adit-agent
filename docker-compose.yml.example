@@ -4,6 +4,7 @@
 # publik-facing (buat menerima webhook dari Synology Chat).
 #
 # Server adit pakai image pre-built dari Docker Hub (endsho/adit-g).
+# adit-agent juga pakai image pre-built (endsho/adit-agent).
 # Isi SYNOLOGY_OUTGOING_TOKEN dan SYNOLOGY_INCOMING_WEBHOOK_URL
 # di file .env (salin dari .env.example) sebelum `docker compose up`.
 
@@ -21,7 +22,7 @@ services:
     #   - "8000:8000"
 
   adit-agent:
-    build: .
+    image: endsho/adit-agent:latest
     container_name: adit-agent
     env_file: .env
     environment:
