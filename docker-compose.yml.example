@@ -13,8 +13,8 @@ services:
     image: endsho/adit-g:latest
     container_name: adit-server
     volumes:
-      - ./checkpoints:/app/checkpoints
-      - ./data:/app/data
+      - checkpoints:/app/checkpoints
+      - data:/app/data
     # tidak perlu "ports:" -- cukup diakses dari adit-agent lewat network
     # internal docker compose, tidak perlu diekspos ke host/internet.
     # uncomment baris di bawah kalau mau akses langsung dari luar (debug):
@@ -31,3 +31,7 @@ services:
       - "9000:9000"   # ini yang perlu bisa diakses dari luar (buat webhook Synology)
     depends_on:
       - adit-server
+
+volumes:
+  checkpoints:
+  data:
