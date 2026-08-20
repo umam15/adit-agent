@@ -1,0 +1,32 @@
+# Contoh menjalankan adit-agent + server adit dalam satu network, supaya
+# ADIT_BASE_URL bisa pakai nama service ("http://adit-server:8000") tanpa
+# perlu expose port adit ke luar sama sekali -- cuma adit-agent yang perlu
+# publik-facing (buat menerima webhook dari Synology Chat).
+#
+# Server adit pakai image pre-built dari Docker Hub (endsho/adit-g).
+# Isi SYNOLOGY_OUTGOING_TOKEN dan SYNOLOGY_INCOMING_WEBHOOK_URL
+# di file .env (salin dari .env.example) sebelum `docker compose up`.
+
+services:
+  adit-server:
+    image: endsho/adit-g:latest
+    container_name: adit-server
+    volumes:
+      - ./checkpoints:/app/checkpoints
+      - ./data:/app/data
+    # tidak perlu "ports:" -- cukup diakses dari adit-agent lewat network
+    # internal docker compose, tidak perlu diekspos ke host/internet.
+    # uncomment baris di bawah kalau mau akses langsung dari luar (debug):
+    # ports:
+    #   - "8000:8000"
+
+  adit-agent:
+    build: .
+    container_name: adit-agent
+    env_file: .env
+    environment:
+      ADIT_BASE_URL: http://adit-server:8000
+    ports:
+      - "9000:9000"   # ini yang perlu bisa diakses dari luar (buat webhook Synology)
+    depends_on:
+      - adit-server
