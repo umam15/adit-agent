@@ -9,6 +9,133 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-08-22
+
+Rilis ini merespons `docs/laporan/LAPORAN-MASALAH-ADIT-AGENT-20260822.md`
+(pengujian penerapan 0.4.4, termasuk verifikasi end-to-end ke Synology Chat
+sungguhan) dan diskusi desain arsitektur lanjutan.
+
+### Fixed — KRITIS
+- **`synology_bot` gagal senyap tanpa `reply_to_user`** (laporan M3): payload
+  ke URL Bot Synology (`method=chatbot`) wajib menyertakan `user_ids`, tapi
+  sebelumnya tidak ada jalur apa pun yang membuat `reply_to_user` bernilai
+  `true` secara otomatis untuk platform ini -- request tetap sukses (HTTP
+  200) tapi pesan tidak sampai ke siapa pun. `reply_to_user` sekarang
+  **di-hardcode `true`** di `SynologyAdapter.__init__` (`app/channels/synology.py`,
+  `_FORCE_REPLY_TO_USER`) begitu `platform == "synology_bot"` -- override,
+  bukan default, jadi tetap benar walau ada baris lama di database yang
+  eksplisit menyimpan `false`. Berlaku juga untuk endpoint "Tes koneksi"
+  (`app/api_admin.py` sebelumnya tidak meneruskan `platform` sama sekali ke
+  adapter tes -- ikut diperbaiki, lihat "Changed" di bawah).
+- **Normalisasi `user_id`** (laporan M4, potensi): Synology Chat pada
+  beberapa kondisi mengirim `user_id` sebagai string JSON-array (`'["8"]'`)
+  alih-alih angka polos. `int(message.user_id)` langsung sebelumnya gagal
+  senyap untuk kasus ini (`ValueError` tertangkap, fallback tanpa
+  `user_ids` -- gejala identik bug di atas). `_normalize_user_id()` baru
+  (`app/channels/synology_chat_bot.py`) menerima `8`, `"8"`, `'["8"]'`,
+  `["8"]`, `[8]`.
+- **Toggle Aktif tidak ada di alur "Tambah agent"** (laporan M2): endpoint
+  `POST /api/agents` default `active=false` tapi modal "Tambah agent"
+  (`app/web/index.html`) sebelumnya tidak punya kontrol untuk mengubahnya
+  saat create -- ditambahkan toggle "Aktifkan begitu disimpan" di modal.
+
+### Added
+- **Webhook dispatch dinamis** -- mengganti kebutuhan restart proses untuk
+  operasi agent, bukan cuma memberi tombol untuk itu. `app/main.py` sekarang
+  cuma punya SATU route (`webhook_dispatch`, pola
+  `POST /webhook/{platform}/{slug}`) yang lookup agent dari database per
+  request (`store.get_agent_by_webhook_path()`, baru), bukan route statis
+  per adapter yang didaftarkan sekali saat startup. Konsekuensi:
+  create/update/delete/toggle agent lewat panel `/admin` **langsung live**,
+  tanpa restart sama sekali. `/healthz` juga query database fresh tiap
+  dipanggil (bukan baca list statis).
+- `app/channels/build_adapter()` -- fungsi bersama untuk membangun satu
+  instance adapter dari `AgentRecord`, dipakai `load_channels()`,
+  `webhook_dispatch` (`app/main.py`), dan endpoint tes koneksi
+  (`app/api_admin.py`) -- sebelumnya tiga tempat ini punya logika
+  instansiasi adapter yang sedikit berbeda-beda (jadi sumber bug
+  `reply_to_user` di atas tidak konsisten diperbaiki di endpoint tes).
+
+### Changed
+- Field `"restart_required"` di respons `POST`/`PATCH /api/agents/*`
+  dihapus -- sudah tidak relevan sejak webhook dispatch dinamis. Banner
+  restart di panel admin juga dihapus.
+- `SynologyAdapter.__init__` terima parameter baru `platform` (default
+  `"synology_chat"`, backward-compatible).
+- `app/channels/__init__.py`: `_PLATFORM_ADAPTERS`/loop instansiasi adapter
+  dipindah ke `build_adapter()` (lihat "Added").
+
+### Docs
+- `docs/architecture.md`, `docs/channels/synology-chat.md`, `README.md`:
+  hapus semua instruksi "restart setelah tambah/ubah agent" yang sudah
+  tidak berlaku.
+- Laporan pengujian disalin ke `docs/laporan/` (data sensitif -- domain NAS
+  asli, token webhook yang tidak sengaja tidak ter-redaksi, nama pengguna --
+  sudah dihapus/diganti placeholder sebelum disalin).
+
+### Dipertimbangkan, sengaja TIDAK dikerjakan
+Lihat `TODO.md` bagian "Tidak akan dikerjakan" untuk desain yang
+dipertimbangkan tapi sengaja tidak diambil di rilis ini (edit admin token
+dari UI, halaman "Pengaturan" generik) beserta alasannya -- ringkasnya:
+kredensial admin sebaiknya tetap di layer infra (env var), terpisah dari
+sistem yang dia lindungi; setting yang butuh restart (host/port) sebaiknya
+tidak dibuat UI-editable karena menciptakan ekspektasi salah.
+
+## [0.4.4] - 2026-08-22
+
+### Added
+- **Panel admin di `/admin`** (`app/web/index.html`, disajikan langsung
+  oleh adit-agent lewat `StaticFiles`): tambah/lihat/ubah/hapus agent chat
+  dari browser, termasuk kredensial (token, URL webhook), toggle
+  aktif/nonaktif, dan tombol "Tes koneksi" yang mengirim pesan uji
+  sungguhan sebelum agent diaktifkan.
+- `app/api_admin.py`: router `GET/POST/PATCH/DELETE /api/agents` +
+  `POST /api/agents/{id}/test`, dipakai panel admin di atas. Bisa dikunci
+  dengan `ADIT_AGENT_ADMIN_TOKEN` (opsional, bearer token).
+- `app/store.py`: penyimpanan agent (SQLite) dengan kredensial terenkripsi
+  (Fernet, key dari `ADIT_AGENT_SECRET_KEY`) — menggantikan `.env` sebagai
+  tempat mengisi kredensial per-channel.
+- **Multi-instance per platform**: sekarang bisa memasang lebih dari satu
+  Synology Chat/Bot/Telegram sekaligus, masing-masing dengan kredensial
+  dan `webhook_path` sendiri (`SynologyAdapter`/`SynologyChatListener`/
+  `SynologyChatBot` menerima `config` dict per-instance, `channel_id`
+  dipakai sebagai prefix `session_id` supaya riwayat percakapan dua
+  instance tidak numpuk).
+- `test_connection()` (opsional per adapter, `app/channels/base.py`) —
+  dipakai tombol "Tes koneksi", terpisah dari `send_reply()` supaya tidak
+  mengubah perilaku pengiriman pesan normal.
+- CORS opsional (`ADIT_AGENT_UI_ORIGINS`) untuk kasus panel admin di-hosting
+  terpisah dari adit-agent sendiri.
+- Dokumentasi teknis dipindah ke `docs/architecture.md` dan
+  `docs/channels/synology-chat.md`, README utama ditulis ulang untuk
+  pengguna non-teknis (fokus: cara pakai panel admin).
+
+### Changed — BREAKING
+- **Kredensial channel (Synology Chat/Bot) TIDAK LAGI dibaca dari env
+  var.** `SYNOLOGY_OUTGOING_TOKEN`, `SYNOLOGY_INCOMING_WEBHOOK_URL`,
+  `SYNOLOGY_REPLY_TO_USER`, `SYNOLOGY_VERIFY_SSL` semuanya dihapus dari
+  `.env.example` — isi ulang lewat panel `/admin` setelah upgrade. Env var
+  di adit-agent sekarang khusus setting admin/server (`ADIT_BASE_URL`,
+  `ADIT_AGENT_SECRET_KEY`, dst).
+- `ADIT_AGENT_SECRET_KEY` sekarang **wajib** diisi — adit-agent tidak akan
+  start tanpanya (`app/channels/__init__.py` sengaja membiarkan
+  `SecretKeyMissing` menjalar ke atas, bukan fallback diam-diam), supaya
+  kegagalan konfigurasinya eksplisit sejak awal, bukan berupa "channel
+  tidak jalan" yang membingungkan belakangan.
+- `app/channels/__init__.py`: `CHANNELS` sekarang murni dari agent aktif di
+  database (diisi lewat panel admin), bukan list hardcode. Kalau belum ada
+  agent, `CHANNELS` kosong dan adit-agent tetap start normal — `/admin`
+  tetap bisa dibuka untuk menambah agent pertama.
+
+### Migrasi dari 0.4.3
+1. `pip install -r requirements.txt` (`cryptography` baru ditambahkan).
+2. Generate `ADIT_AGENT_SECRET_KEY` (lihat `.env.example`), isi sebagai env
+   var permanen.
+3. Jalankan adit-agent, buka `/admin`, tambah ulang agent Synology Chat
+   kamu dengan token/URL yang sama seperti di `.env` lama.
+4. Hapus `SYNOLOGY_*` dari `.env` (sudah tidak dipakai).
+5. Restart adit-agent supaya webhook agent yang baru ditambah aktif.
+
 ## [0.4.2] - 2026-08-14
 
 ### Changed

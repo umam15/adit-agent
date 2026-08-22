@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>adit-agent — Panel Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --page:#EEF1F0; --card:#FFFFFF; --line:#DDE3E1; --line-strong:#C6CEC9;
+    --ink:#1B221F; --ink-2:#5B655F; --ink-3:#8A928C;
+    --accent:#0F6E56; --accent-bg:#E1F5EE; --accent-strong:#085041;
+    --warn:#854F0B; --warn-bg:#FAEEDA;
+    --danger:#A32D2D; --danger-bg:#FCEBEB; --gray-bg:#F1EFE8;
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--page);color:var(--ink);}
+  .app{max-width:1120px;margin:0 auto;padding:28px 24px 64px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:32px;height:32px;border-radius:8px;background:var(--accent-strong);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-family:var(--mono);}
+  .brand-text h1{font-size:16px;margin:0;font-weight:600;}
+  .brand-text p{font-size:12px;margin:0;color:var(--ink-2);}
+  .topbar-actions{display:flex;gap:10px;align-items:center;}
+  .server-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:var(--card);border:1px solid var(--line);padding:6px 10px;border-radius:20px;}
+  .server-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  .server-pill.err .dot{background:var(--danger);}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:500;border-radius:8px;padding:8px 14px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s;}
+  .btn:hover{background:var(--gray-bg);}
+  .btn-primary{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff;}
+  .btn-primary:hover{background:#063d32;}
+  .btn-danger-text{border:none;background:none;color:var(--danger);padding:6px 0;}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+  .metric{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;}
+  .metric .label{font-size:12px;color:var(--ink-2);margin-bottom:6px;}
+  .metric .value{font-size:22px;font-weight:600;}
+  .metric .value.ok{color:var(--accent-strong);}
+  .metric .value.warn{color:var(--warn);}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px;}
+  .section-head h2{font-size:14px;font-weight:600;margin:0;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:border-color .12s, box-shadow .12s;}
+  .card:hover{border-color:var(--line-strong);box-shadow:0 1px 6px rgba(20,30,26,.06);}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+  .platform-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+  .pi-synology_chat{background:var(--accent-bg);color:var(--accent-strong);}
+  .pi-synology_bot{background:#EEEDFE;color:#3C3489;}
+  .pi-telegram{background:#E6F1FB;color:#0C447C;}
+  .status-row{display:flex;align-items:center;gap:6px;font-size:12px;}
+  .status-dot{width:7px;height:7px;border-radius:50%;}
+  .status-active .status-dot{background:var(--accent);}
+  .status-active{color:var(--accent-strong);}
+  .status-inactive .status-dot{background:var(--ink-3);}
+  .status-inactive{color:var(--ink-3);}
+  .card h3{font-size:14px;margin:0 0 3px;font-weight:600;}
+  .card .subtitle{font-size:12px;color:var(--ink-2);margin:0 0 12px;}
+  .card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:2px;}
+  .webhook-path{font-family:var(--mono);font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;}
+  .card-add{border:1.5px dashed var(--line-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink-2);min-height:158px;background:transparent;}
+  .card-add:hover{border-color:var(--accent);color:var(--accent-strong);background:var(--accent-bg);}
+  .card-add i{font-size:22px;}
+  .card-add span{font-size:13px;font-weight:500;}
+  .empty-state{grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--ink-2);font-size:13px;}
+  .overlay{position:fixed;inset:0;background:rgba(20,26,23,.38);display:none;align-items:stretch;justify-content:flex-end;z-index:50;}
+  .overlay.show{display:flex;}
+  .overlay.center{align-items:center;justify-content:center;}
+  .drawer{width:420px;max-width:92vw;background:var(--card);height:100%;overflow-y:auto;padding:22px 22px 40px;box-shadow:-8px 0 24px rgba(0,0,0,.08);}
+  .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+  .drawer-head .name-input{font-size:17px;font-weight:600;border:none;background:none;padding:2px 0;width:100%;border-bottom:1px solid transparent;}
+  .drawer-head .name-input:focus{outline:none;border-bottom:1px solid var(--line-strong);}
+  .icon-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .icon-btn:hover{background:var(--gray-bg);}
+  .badge-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .badge{font-size:11px;padding:3px 9px;border-radius:12px;font-weight:500;}
+  .badge-type{background:var(--gray-bg);color:var(--ink-2);}
+  .toggle{position:relative;width:38px;height:22px;border-radius:12px;background:var(--line-strong);cursor:pointer;flex-shrink:0;transition:background .15s;}
+  .toggle.on{background:var(--accent);}
+  .toggle .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;}
+  .toggle.on .knob{left:18px;}
+  .field-group{margin-bottom:18px;}
+  .field-group .fg-label{font-size:11px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;display:block;}
+  .secret-input{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--gray-bg);}
+  .secret-input input{border:none;background:none;font-family:var(--mono);font-size:12.5px;flex:1;min-width:0;color:var(--ink);}
+  .secret-input input:focus{outline:none;}
+  .secret-input .icon-btn{width:22px;height:22px;font-size:14px;}
+  .webhook-box{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--accent-bg);}
+  .webhook-box code{font-family:var(--mono);font-size:11.5px;color:var(--accent-strong);flex:1;overflow-x:auto;white-space:nowrap;}
+  .hint{font-size:11.5px;color:var(--ink-3);margin-top:5px;line-height:1.5;}
+  .test-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+  .test-result{font-size:12px;display:flex;align-items:center;gap:5px;}
+  .test-result.ok{color:var(--accent-strong);}
+  .test-result.fail{color:var(--danger);}
+  .divider{border:none;border-top:1px solid var(--line);margin:20px 0;}
+  .danger-zone{border:1px solid var(--danger-bg);background:var(--danger-bg);border-radius:8px;padding:12px 14px;margin-top:22px;}
+  .danger-zone p{font-size:12px;color:var(--ink-2);margin:0 0 8px;}
+  .modal{width:460px;max-width:92vw;background:var(--card);border-radius:14px;padding:22px;margin:auto;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .modal-head h2{font-size:16px;margin:0;}
+  .modal-sub{font-size:12.5px;color:var(--ink-2);margin:0 0 18px;}
+  .platform-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pp-option{border:1px solid var(--line);border-radius:10px;padding:14px 12px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .12s,background .12s;}
+  .pp-option:hover{border-color:var(--accent);background:var(--accent-bg);}
+  .pp-option .platform-icon{width:30px;height:30px;font-size:15px;}
+  .pp-option strong{font-size:13px;}
+  .pp-option span{font-size:11.5px;color:var(--ink-2);}
+  .form-field{margin-bottom:14px;}
+  .form-field label{font-size:12px;font-weight:500;display:block;margin-bottom:5px;}
+  .form-field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--sans);}
+  .form-field input:focus{outline:none;border-color:var(--accent);}
+  .form-field.mono input{font-family:var(--mono);font-size:12.5px;}
+  .form-field .err{color:var(--danger);font-size:11.5px;margin-top:4px;display:none;}
+  .form-field.invalid input{border-color:var(--danger);}
+  .form-field.invalid .err{display:block;}
+  .modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;}
+  .back-link{font-size:12.5px;color:var(--ink-2);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:4px;padding:0;}
+  .back-link:hover{color:var(--ink);}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;z-index:80;max-width:80vw;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  .toast.err{background:var(--danger);}
+  .spin{animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark">Ad</div>
+      <div class="brand-text"><h1>adit-agent</h1><p>Panel admin — kelola agent chat</p></div>
+    </div>
+    <div class="topbar-actions">
+      <div class="server-pill" id="server-pill"><span class="dot"></span><span id="server-pill-text">memeriksa…</span></div>
+      <button class="btn btn-primary" onclick="openAddModal()"><i class="ti ti-plus"></i>Tambah agent</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="metric"><div class="label">Total agent</div><div class="value" id="m-total">–</div></div>
+    <div class="metric"><div class="label">Aktif</div><div class="value ok" id="m-active">–</div></div>
+    <div class="metric"><div class="label">Nonaktif</div><div class="value" id="m-inactive">–</div></div>
+    <div class="metric"><div class="label">Platform terpasang</div><div class="value" id="m-platforms">–</div></div>
+  </div>
+
+  <div class="section-head"><h2>Agent terpasang</h2></div>
+  <div class="grid" id="agent-grid">
+    <div class="empty-state">Memuat daftar agent…</div>
+  </div>
+</div>
+
+<div class="overlay" id="drawer-overlay" onclick="if(event.target===this) closeDrawer()">
+  <div class="drawer" id="drawer"></div>
+</div>
+<div class="overlay center" id="modal-overlay" onclick="if(event.target===this) closeAddModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- konfigurasi API ---------- */
+// Default: relatif, jadi otomatis benar kalau halaman ini dibuka dari
+// /admin bawaan adit-agent sendiri (same-origin, tidak butuh CORS).
+// Kalau file ini di-hosting terpisah dari server adit-agent, ganti jadi
+// URL penuh, mis: 'https://agent.rumah.local:9000/api/agents', DAN isi
+// ADIT_AGENT_UI_ORIGINS di server dengan origin UI ini (lihat README.md).
+const API_BASE = '/api/agents';
+
+let adminToken = null; // diminta lewat prompt() sekali per muat halaman kalau server minta -- sengaja TIDAK disimpan ke localStorage/sessionStorage.
+
+async function apiFetch(path, options = {}) {
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+  if (adminToken) headers['Authorization'] = `Bearer ${adminToken}`;
+
+  let res = await fetch(API_BASE + path, { ...options, headers });
+
+  if (res.status === 401) {
+    adminToken = window.prompt('Panel ini butuh token admin (ADIT_AGENT_ADMIN_TOKEN). Masukkan token:');
+    if (!adminToken) throw new Error('Token admin dibutuhkan.');
+    headers['Authorization'] = `Bearer ${adminToken}`;
+    res = await fetch(API_BASE + path, { ...options, headers });
+  }
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try { const body = await res.json(); detail = body.detail || detail; } catch (_) {}
+    throw new Error(detail);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+const PLATFORMS = {
+  synology_chat: { label:"Synology Chat", icon:"ti-message-circle", cls:"pi-synology_chat",
+    fields:[
+      {key:"outgoing_token", label:"Token outgoing webhook", placeholder:"tempel token dari Synology Chat"},
+      {key:"incoming_webhook_url", label:"URL incoming webhook", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."}
+    ]},
+  synology_bot: { label:"Synology Bot", icon:"ti-robot", cls:"pi-synology_bot",
+    fields:[
+      {key:"outgoing_token", label:"Token outgoing webhook", placeholder:"tempel token dari Synology Chat"},
+      {key:"incoming_webhook_url", label:"URL webhook Bot (method=chatbot)", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."}
+    ]},
+  telegram: { label:"Telegram", icon:"ti-brand-telegram", cls:"pi-telegram",
+    fields:[
+      {key:"bot_token", label:"Bot token", placeholder:"123456:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},
+      {key:"webhook_secret", label:"Secret header webhook", placeholder:"dibuat otomatis atau isi sendiri"}
+    ]}
+};
+
+let agentsCache = [];
+
+function toast(msg, isErr = false){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('err', isErr);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------- dashboard ---------- */
+async function loadAgents(){
+  try {
+    agentsCache = await apiFetch('', { method: 'GET' });
+    setServerStatus(true);
+  } catch (e) {
+    setServerStatus(false, e.message);
+    document.getElementById('agent-grid').innerHTML =
+      `<div class="empty-state">Gagal memuat agent: ${escapeHtml(e.message)}</div>`;
+    return;
+  }
+  renderGrid();
+}
+
+function setServerStatus(ok, detail){
+  const pill = document.getElementById('server-pill');
+  const text = document.getElementById('server-pill-text');
+  pill.classList.toggle('err', !ok);
+  text.textContent = ok ? 'adit-agent tersambung' : `error: ${detail}`;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderGrid(){
+  const grid = document.getElementById('agent-grid');
+  grid.innerHTML = '';
+
+  if (agentsCache.length === 0){
+    grid.innerHTML = `<div class="empty-state">Belum ada agent. Klik "Tambah agent" untuk menyambungkan Synology Chat, Synology Bot, atau Telegram.</div>`;
+  } else {
+    agentsCache.forEach(a=>{
+      const p = PLATFORMS[a.platform] || { label: a.platform, icon: 'ti-plug', cls: '' };
+      const statusCls = a.active ? 'status-active' : 'status-inactive';
+      const statusLabel = a.active ? 'Aktif' : 'Nonaktif';
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.onclick = ()=>openDrawer(a.id);
+      el.innerHTML = `
+        <div class="card-top">
+          <div class="platform-icon ${p.cls}"><i class="ti ${p.icon}"></i></div>
+          <div class="status-row ${statusCls}"><span class="status-dot"></span>${statusLabel}</div>
+        </div>
+        <h3>${escapeHtml(a.name)}</h3>
+        <p class="subtitle">${p.label}</p>
+        <div class="card-foot">
+          <span class="webhook-path">${escapeHtml(a.webhook_path)}</span>
+        </div>`;
+      grid.appendChild(el);
+    });
+  }
+
+  const addCard = document.createElement('div');
+  addCard.className = 'card card-add';
+  addCard.onclick = openAddModal;
+  addCard.innerHTML = `<i class="ti ti-plus"></i><span>Tambah agent</span>`;
+  grid.appendChild(addCard);
+
+  document.getElementById('m-total').textContent = agentsCache.length;
+  document.getElementById('m-active').textContent = agentsCache.filter(a=>a.active).length;
+  document.getElementById('m-inactive').textContent = agentsCache.filter(a=>!a.active).length;
+  document.getElementById('m-platforms').textContent = new Set(agentsCache.map(a=>a.platform)).size;
+}
+
+/* ---------- drawer (detail & kredensial agent) ---------- */
+async function openDrawer(id){
+  let a;
+  try {
+    a = await apiFetch(`/${id}`, { method: 'GET' });
+  } catch (e) {
+    toast(`Gagal memuat detail: ${e.message}`, true);
+    return;
+  }
+
+  const p = PLATFORMS[a.platform] || { label: a.platform, icon: 'ti-plug', cls: '', fields: [] };
+  const statusCls = a.active ? 'status-active' : 'status-inactive';
+  const statusLabel = a.active ? 'Aktif' : 'Nonaktif';
+
+  const fieldsHtml = p.fields.map(f=>`
+    <div class="field-group">
+      <label class="fg-label">${f.label}</label>
+      <div class="secret-input">
+        <input type="password" data-field="${f.key}" value="${escapeHtml(a.creds[f.key]||'')}" placeholder="${f.placeholder}">
+        <button class="icon-btn" onclick="toggleSecret(this)" aria-label="Lihat nilai"><i class="ti ti-eye"></i></button>
+      </div>
+    </div>`).join('');
+
+  const origin = window.location.origin;
+  const d = document.getElementById('drawer');
+  d.innerHTML = `
+    <div class="drawer-head">
+      <input class="name-input" value="${escapeHtml(a.name)}" data-role="name">
+      <button class="icon-btn" onclick="closeDrawer()" aria-label="Tutup"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="badge-row">
+      <span class="badge badge-type"><i class="ti ${p.icon}" style="margin-right:4px;"></i>${p.label}</span>
+      <span class="status-row ${statusCls}" style="margin-left:auto;"><span class="status-dot"></span>${statusLabel}</span>
+      <div class="toggle ${a.active?'on':''}" id="active-toggle"></div>
+    </div>
+
+    <div class="field-group">
+      <label class="fg-label">URL webhook masuk (daftarkan ini di ${p.label})</label>
+      <div class="webhook-box">
+        <code id="webhook-url">${escapeHtml(origin + a.webhook_path)}</code>
+        <button class="icon-btn" onclick="copyWebhook()" aria-label="Salin"><i class="ti ti-copy"></i></button>
+      </div>
+      <p class="hint">Aktif menerima pesan langsung setelah agent disimpan dengan status Aktif — tidak perlu restart proses.</p>
+    </div>
+
+    <hr class="divider">
+    <label class="fg-label" style="margin-bottom:10px;display:block;">Kredensial</label>
+    ${fieldsHtml || '<p class="hint">Platform ini belum punya field kredensial terdaftar di UI.</p>'}
+
+    <div class="test-row">
+      <button class="btn btn-sm" onclick="testConnection('${a.id}', this)"><i class="ti ti-plug"></i>Tes koneksi</button>
+      <span class="test-result" id="test-result"></span>
+    </div>
+
+    <div class="danger-zone">
+      <p>Menghapus agent akan langsung menghentikan pesan masuk dari ${p.label} untuk agent ini. Kredensial ikut terhapus dari database.</p>
+      <button class="btn-danger-text" onclick="deleteAgentUi('${a.id}')"><i class="ti ti-trash" style="margin-right:4px;"></i>Hapus agent</button>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:20px;">
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveAgentUi('${a.id}')">Simpan perubahan</button>
+    </div>
+  `;
+
+  document.getElementById('active-toggle').onclick = function(){ this.classList.toggle('on'); };
+  document.getElementById('drawer-overlay').classList.add('show');
+}
+function closeDrawer(){ document.getElementById('drawer-overlay').classList.remove('show'); }
+
+function toggleSecret(btn){
+  const input = btn.previousElementSibling;
+  const icon = btn.querySelector('i');
+  if(input.type === 'password'){ input.type='text'; icon.className='ti ti-eye-off'; }
+  else { input.type='password'; icon.className='ti ti-eye'; }
+}
+function copyWebhook(){
+  const code = document.getElementById('webhook-url').textContent;
+  navigator.clipboard?.writeText(code).then(()=>toast('URL webhook disalin')).catch(()=>toast('Gagal menyalin, salin manual ya', true));
+}
+
+async function testConnection(id, btn){
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i>Menguji…';
+  const result = document.getElementById('test-result');
+  result.textContent = '';
+  try {
+    const res = await apiFetch(`/${id}/test`, { method: 'POST' });
+    result.className = 'test-result ' + (res.success ? 'ok' : 'fail');
+    result.innerHTML = `<i class="ti ${res.success ? 'ti-check' : 'ti-x'}"></i> ${escapeHtml(res.detail)}`;
+  } catch (e) {
+    result.className = 'test-result fail';
+    result.innerHTML = `<i class="ti ti-x"></i> ${escapeHtml(e.message)}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+async function saveAgentUi(id){
+  const drawer = document.getElementById('drawer');
+  const name = drawer.querySelector('[data-role="name"]').value.trim();
+  const active = drawer.querySelector('#active-toggle').classList.contains('on');
+  const creds = {};
+  drawer.querySelectorAll('[data-field]').forEach(inp => { creds[inp.dataset.field] = inp.value; });
+
+  try {
+    await apiFetch(`/${id}`, { method: 'PATCH', body: JSON.stringify({ name, creds, active }) });
+    await loadAgents();
+    toast('Perubahan disimpan dan langsung aktif');
+  } catch (e) {
+    toast(`Gagal menyimpan: ${e.message}`, true);
+  }
+}
+
+async function deleteAgentUi(id){
+  if (!window.confirm('Hapus agent ini? Kredensialnya ikut terhapus dan tidak bisa dibatalkan.')) return;
+  try {
+    await apiFetch(`/${id}`, { method: 'DELETE' });
+    closeDrawer();
+    await loadAgents();
+    toast('Agent dihapus');
+  } catch (e) {
+    toast(`Gagal menghapus: ${e.message}`, true);
+  }
+}
+
+/* ---------- modal tambah agent ---------- */
+let newAgentPlatform = null;
+function openAddModal(){
+  newAgentPlatform = null;
+  renderModalStep1();
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeAddModal(){ document.getElementById('modal-overlay').classList.remove('show'); }
+
+function renderModalStep1(){
+  const m = document.getElementById('modal');
+  const opts = Object.entries(PLATFORMS).map(([key,p])=>`
+    <div class="pp-option" onclick="selectPlatform('${key}')">
+      <div class="platform-icon ${p.cls}"><i class="ti ${p.icon}"></i></div>
+      <strong>${p.label}</strong>
+      <span>${key==='synology_bot' ? 'Balasan bisa langsung ke pengirim (DM)' : key==='synology_chat' ? 'Balasan muncul di satu channel tetap' : 'Bot Telegram terpisah per grup/DM'}</span>
+    </div>`).join('');
+  m.innerHTML = `
+    <div class="modal-head"><h2>Tambah agent</h2>
+      <button class="icon-btn" onclick="closeAddModal()" aria-label="Tutup"><i class="ti ti-x"></i></button>
+    </div>
+    <p class="modal-sub">Pilih layanan chat yang mau disambungkan. Tiap pilihan jadi agent terpisah — boleh lebih dari satu Telegram bot atau lebih dari satu Synology Chat sekaligus.</p>
+    <div class="platform-pick">${opts}</div>
+  `;
+}
+
+function selectPlatform(key){
+  newAgentPlatform = key;
+  renderModalStep2();
+}
+
+function renderModalStep2(){
+  const p = PLATFORMS[newAgentPlatform];
+  const m = document.getElementById('modal');
+  const fieldsHtml = p.fields.map(f=>`
+    <div class="form-field mono" data-key="${f.key}">
+      <label>${f.label}</label>
+      <input type="text" placeholder="${f.placeholder}">
+      <div class="err">Wajib diisi.</div>
+    </div>`).join('');
+
+  m.innerHTML = `
+    <div class="modal-head"><h2>Tambah agent — ${p.label}</h2>
+      <button class="icon-btn" onclick="closeAddModal()" aria-label="Tutup"><i class="ti ti-x"></i></button>
+    </div>
+    <p class="modal-sub">Kredensial disimpan terenkripsi di adit-agent, hanya dipakai untuk agent ini.</p>
+    <div class="form-field" data-key="name">
+      <label>Nama agent</label>
+      <input type="text" placeholder="mis. Tim Support, Grup Keluarga">
+      <div class="err">Wajib diisi.</div>
+    </div>
+    ${fieldsHtml}
+    <div class="field-group">
+      <label class="fg-label">Status</label>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="toggle" id="new-agent-active-toggle" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+        <span style="font-size:12.5px;color:var(--ink-2);">Aktifkan begitu disimpan</span>
+      </div>
+      <p class="hint">Boleh dibiarkan nonaktif dulu — coba "Tes koneksi" di panel detail setelah disimpan, baru aktifkan.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="back-link" onclick="renderModalStep1()"><i class="ti ti-chevron-left"></i>Kembali</button>
+      <button class="btn btn-primary" id="submit-new-agent" onclick="submitNewAgent()">Simpan & sambungkan</button>
+    </div>
+  `;
+}
+
+async function submitNewAgent(){
+  const fields = document.querySelectorAll('#modal .form-field');
+  let valid = true;
+  const values = {};
+  fields.forEach(f=>{
+    const input = f.querySelector('input');
+    const key = f.dataset.key;
+    if(!input.value.trim()){
+      f.classList.add('invalid');
+      valid = false;
+    } else {
+      f.classList.remove('invalid');
+      values[key] = input.value.trim();
+    }
+  });
+  if(!valid) return;
+
+  const p = PLATFORMS[newAgentPlatform];
+  const creds = {};
+  p.fields.forEach(f=>{ creds[f.key] = values[f.key]; });
+  const active = document.getElementById('new-agent-active-toggle').classList.contains('on');
+
+  const btn = document.getElementById('submit-new-agent');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan…';
+  try {
+    const created = await apiFetch('', {
+      method: 'POST',
+      body: JSON.stringify({ platform: newAgentPlatform, name: values.name, creds, active })
+    });
+    closeAddModal();
+    await loadAgents();
+    toast(active ? 'Agent ditambahkan dan aktif' : 'Agent ditambahkan — coba "Tes koneksi" sebelum diaktifkan');
+    openDrawer(created.id);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Simpan & sambungkan';
+    toast(`Gagal membuat agent: ${e.message}`, true);
+  }
+}
+
+loadAgents();
+</script>
+</body>
+</html>

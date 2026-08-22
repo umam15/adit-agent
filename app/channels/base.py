@@ -68,3 +68,11 @@ class ChannelAdapter(ABC):
     def empty_text_response(self, message: IncomingMessage) -> Any:
         """Body respons kalau teks pesan kosong setelah di-strip."""
         return {"text": "Kirim pertanyaan dulu ya."}
+
+    async def test_connection(self) -> tuple[bool, str]:
+        """OPSIONAL (bukan bagian kontrak wajib) -- implementasikan kalau
+        channel ini ingin didukung tombol "Tes koneksi" di panel admin
+        (app/api_admin.py). Default: dianggap tidak didukung. Beda dari
+        send_reply(): harus melaporkan sukses/gagal secara eksplisit, tidak
+        boleh cuma log lalu diam. Lihat SynologyAdapter.test_connection()."""
+        return False, "Channel ini belum mendukung tes koneksi."

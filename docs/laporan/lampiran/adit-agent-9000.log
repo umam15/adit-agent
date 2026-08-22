@@ -1,0 +1,101 @@
+﻿2026-08-22 07:45:19,946 INFO adit-agent: ADIT_AGENT_UI_ORIGINS belum diset -- /api/agents/* hanya bisa diakses dari origin yang sama dengan adit-agent sendiri (mis. dibuka lewat file:// atau disajikan dari proses ini juga). Kalau UI dijalankan di server/port terpisah, isi env var ini atau browser akan memblokirnya.
+INFO:     Started server process [9016]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:65279 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65298 - "GET /admin HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:65298 - "GET /admin/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65298 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:65299 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:65299 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:65318 - "GET /admin/ HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:65318 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:65318 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:65319 - "GET /admin/ HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:65319 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:65319 - "GET /api/agents HTTP/1.1" 200 OK
+2026-08-22 07:48:15,495 INFO adit-agent.store: Agent baru dibuat: id=45bd1d3ad738 platform=synology_bot name='Azza'
+INFO:     127.0.0.1:65440 - "POST /api/agents HTTP/1.1" 201 Created
+INFO:     127.0.0.1:65440 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65440 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+2026-08-22 07:48:23,941 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:65450 - "POST /api/agents/45bd1d3ad738/test HTTP/1.1" 200 OK
+2026-08-22 07:48:46,353 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:65473 - "POST /api/agents/45bd1d3ad738/test HTTP/1.1" 200 OK
+2026-08-22 07:48:51,866 INFO adit-agent.store: Agent diupdate: id=45bd1d3ad738 active=False
+INFO:     127.0.0.1:65482 - "PATCH /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65482 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65506 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65506 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65515 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49280 - "GET /healthz HTTP/1.1" 200 OK
+2026-08-22 07:52:32,440 INFO adit-agent: ADIT_AGENT_UI_ORIGINS belum diset -- /api/agents/* hanya bisa diakses dari origin yang sama dengan adit-agent sendiri (mis. dibuka lewat file:// atau disajikan dari proses ini juga). Kalau UI dijalankan di server/port terpisah, isi env var ini atau browser akan memblokirnya.
+INFO:     Started server process [18324]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49325 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     192.168.x.x:49350 - "GET / HTTP/1.1" 404 Not Found
+INFO:     192.168.x.x:49350 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49354 - "GET /admin/ HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:49354 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49355 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49355 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49355 - "GET /admin/ HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:49355 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49355 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49355 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+2026-08-22 07:53:35,908 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:49391 - "POST /api/agents/45bd1d3ad738/test HTTP/1.1" 200 OK
+2026-08-22 07:53:42,076 INFO adit-agent.store: Agent diupdate: id=45bd1d3ad738 active=False
+INFO:     127.0.0.1:49401 - "PATCH /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49401 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49463 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49463 - "GET /admin/ HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:49463 - "GET /api/agents HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:49463 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49478 - "GET /api/agents HTTP/1.1" 200 OK
+2026-08-22 07:55:06,160 INFO adit-agent.store: Agent diupdate: id=45bd1d3ad738 active=True
+INFO:     127.0.0.1:49492 - "PATCH /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+2026-08-22 07:55:24,953 INFO adit-agent: ADIT_AGENT_UI_ORIGINS belum diset -- /api/agents/* hanya bisa diakses dari origin yang sama dengan adit-agent sendiri (mis. dibuka lewat file:// atau disajikan dari proses ini juga). Kalau UI dijalankan di server/port terpisah, isi env var ini atau browser akan memblokirnya.
+INFO:     Started server process [18040]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49516 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     192.168.x.x:49729 - "GET /webhook/synology/azza HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:49741 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49779 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+INFO:     192.168.x.x:42110 - "POST /webhook/synology/azza HTTP/1.1" 200 OK
+2026-08-22 08:00:16,579 INFO httpx: HTTP Request: POST http://127.0.0.1:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-22 08:00:17,186 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:50206 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+2026-08-22 08:06:09,889 INFO adit-agent.store: Agent diupdate: id=45bd1d3ad738 active=True
+INFO:     127.0.0.1:50206 - "PATCH /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
+2026-08-22 08:06:35,729 INFO adit-agent: ADIT_AGENT_UI_ORIGINS belum diset -- /api/agents/* hanya bisa diakses dari origin yang sama dengan adit-agent sendiri (mis. dibuka lewat file:// atau disajikan dari proses ini juga). Kalau UI dijalankan di server/port terpisah, isi env var ini atau browser akan memblokirnya.
+INFO:     Started server process [20032]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:50237 - "GET /healthz HTTP/1.1" 200 OK
+INFO:     192.168.x.x:42456 - "POST /webhook/synology/azza HTTP/1.1" 200 OK
+2026-08-22 08:08:20,248 INFO httpx: HTTP Request: POST http://127.0.0.1:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-22 08:08:21,078 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+INFO:     192.168.x.x:42462 - "POST /webhook/synology/azza HTTP/1.1" 200 OK
+2026-08-22 08:08:28,751 INFO httpx: HTTP Request: POST http://127.0.0.1:8000/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-22 08:08:29,857 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+2026-08-22 08:13:33,915 INFO adit-agent.store: Agent baru dibuat: id=2110b788c02a platform=synology_chat name='Adit'
+INFO:     127.0.0.1:50686 - "POST /api/agents HTTP/1.1" 201 Created
+INFO:     127.0.0.1:50686 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50686 - "GET /api/agents/2110b788c02a HTTP/1.1" 200 OK
+2026-08-22 08:13:39,384 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=incoming&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:50686 - "POST /api/agents/2110b788c02a/test HTTP/1.1" 200 OK
+2026-08-22 08:13:41,326 INFO adit-agent.store: Agent diupdate: id=2110b788c02a active=False
+INFO:     127.0.0.1:50686 - "PATCH /api/agents/2110b788c02a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50686 - "GET /api/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50705 - "GET /api/agents/2110b788c02a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50705 - "GET /api/agents/2110b788c02a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50705 - "GET /api/agents/2110b788c02a HTTP/1.1" 200 OK
+INFO:     192.168.x.x:42674 - "POST /webhook/synology/adit HTTP/1.1" 404 Not Found
+
