@@ -9,6 +9,26 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-08-24
+
+Rilis housekeeping -- tidak ada perubahan perilaku, murni kerapian repo dan
+nomor versi yang bisa dicek dari luar.
+
+### Added
+- `__version__` di `app/__init__.py`, sekarang tampil di metadata FastAPI
+  (jadi kelihatan di `/docs`) dan di respons `GET /healthz` (field
+  `"version"`) -- sebelumnya tidak ada cara mengecek versi yang sedang
+  jalan tanpa membaca kode.
+- `.gitignore` dan `.dockerignore` -- belum ada sebelumnya, jadi
+  `__pycache__/`, `.env`, database SQLite lokal (`data/*.db`), dan file
+  `.zip` rilis berisiko ikut ter-commit atau ikut masuk ke image Docker.
+
+### Changed
+- Redaksi nama contoh (`Azza` -> `TestBot`) di
+  `docs/laporan/LAPORAN-MASALAH-ADIT-AGENT-20260822.md` dan lampiran
+  log-nya -- nama itu kepakai sebagai nama agent uji coba, diganti supaya
+  laporan tidak menyertakan nama personal.
+
 ## [0.4.5] - 2026-08-22
 
 Rilis ini merespons `docs/laporan/LAPORAN-MASALAH-ADIT-AGENT-20260822.md`

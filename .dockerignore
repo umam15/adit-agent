@@ -1,0 +1,34 @@
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Version control
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Data & runtime
+data/
+*.db
+*.sqlite3
+*.log
+
+# Docs (tidak dipakai di image runtime)
+docs/
+README.md
+TODO.md
+CHANGELOG.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Build artifacts
+*.zip

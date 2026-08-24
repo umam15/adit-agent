@@ -27,7 +27,7 @@ Update berhasil diterapkan dan seluruh pipeline tercatat berjalan (webhook 200 �
 - Endpoint create mem-default nonaktif: `api_admin.py:113` → `active = bool(body.get("active", False))`.
 - UI panel (`app/web/index.html`) **hanya menampilkan** label Aktif/Nonaktif (baris 259–260, metrik 145–146) — **tidak ada kontrol** untuk mengatur status saat create maupun edit.
 - Akibat berantai: `load_channels(active_only=True)` (`app/channels/__init__.py`) melewatkan record → `/healthz` tetap `{"channels": []}` bahkan setelah restart.
-- Kasus nyata: agent "Azza" (id `45bd1d3ad738`) dibuat lewat panel dengan `active=false`; harus di-PATCH manual `{"active": true}`.
+- Kasus nyata: agent "TestBot" (id `45bd1d3ad738`) dibuat lewat panel dengan `active=false`; harus di-PATCH manual `{"active": true}`.
 
 ### M3 — URL Bot gagal senyap tanpa `reply_to_user` (kritis)
 - Sender memuat flag dengan default False untuk SEMUA platform: `synology_chat_bot.py:57` → `_get_bool(config.get("reply_to_user"), False)`.
@@ -35,7 +35,7 @@ Update berhasil diterapkan dan seluruh pipeline tercatat berjalan (webhook 200 �
 - Protokol Synology: payload ke URL Bot **wajib** menyertakan `user_ids`; tanpanya request tetap HTTP 200 tetapi pesan tidak dikirim ke siapa pun.
 - UI panel tidak menyediakan field `reply_to_user` sama sekali (tidak ada satu pun kecocokan di `index.html`) — satu-satunya jalan konfigurasi adalah PATCH API manual.
 - Perhatian PATCH: `creds` **menimpa seluruh dict lama**, bukan merge per-key (docstring `api_admin.py` PATCH) — salah langkah bisa menghapus token.
-- Bukti log (lampiran `adit-agent-9000.log`, 08:00:16–17): `POST /webhook/synology/azza 200` → `POST .../v1/chat/completions 200` → `POST https://...entry.cgi?...method=chatbot... "HTTP/1.1 200 OK"` — namun tidak ada pesan yang muncul.
+- Bukti log (lampiran `adit-agent-9000.log`, 08:00:16–17): `POST /webhook/synology/testbot 200` → `POST .../v1/chat/completions 200` → `POST https://...entry.cgi?...method=chatbot... "HTTP/1.1 200 OK"` — namun tidak ada pesan yang muncul.
 - Workaround lokal yang diterapkan: PATCH creds lengkap + `reply_to_user=true`, lalu restart proses.
 
 ### M4 — Format `user_id` array-string (potensi sedang)

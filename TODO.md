@@ -5,6 +5,18 @@
 > (pengujian penerapan 0.4.2 → 0.4.4 + verifikasi end-to-end Synology Chat
 > asli). Baca laporan itu untuk log mentah & konteks lengkap tiap temuan.
 
+## Selesai di 0.4.6
+
+- [x] **Versi aplikasi bisa dicek dari luar** — `__version__` di
+  `app/__init__.py`, tampil di metadata FastAPI dan `GET /healthz`.
+- [x] **`.gitignore` & `.dockerignore`** — sebelumnya tidak ada.
+- [x] **Redaksi nama personal di laporan** — `Azza` → `TestBot` di
+  `docs/laporan/LAPORAN-MASALAH-ADIT-AGENT-20260822.md` & log lampiran.
+- [x] **(2026-08-22) Penamaan zip rilis tidak konsisten (M1)** — dicek
+  ulang: paket rilis sejak 0.4.5 sudah konsisten (nama file & folder root
+  sama-sama `adit-agent-v0_4_x`). Tetap jaga konsistensi ini di rilis
+  berikutnya.
+
 ## Selesai di 0.4.5
 
 - [x] **[KRITIS] `synology_bot` gagal senyap tanpa `reply_to_user`** — lihat
@@ -174,12 +186,6 @@
 
 ## Prioritas rendah / nice-to-have
 
-- [ ] **(2026-08-22) Penamaan zip rilis tidak konsisten dengan folder di
-  dalamnya (M1)**: `adit-agent-v0_4_2-changelog-format-20260817-1005.zip`
-  ternyata berisi root folder `adit-agent-v0_4_3/`. Rendah dampak tapi bisa
-  membingungkan pelacakan versi kalau proses deploy mengandalkan nama file
-  untuk timpa-file otomatis. Pastikan nama zip & nama folder root selalu
-  sinkron untuk rilis berikutnya.
 - [ ] **(2026-08-22) `.env` tidak dimuat otomatis (M7)**: adit-agent tidak
   memakai `python-dotenv`, jadi `.env` di root repo TIDAK otomatis terbaca
   saat `uvicorn app.main:app` dijalankan langsung — env var harus di-export

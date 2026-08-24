@@ -15,7 +15,7 @@ INFO:     127.0.0.1:65318 - "GET /api/agents HTTP/1.1" 401 Unauthorized
 INFO:     127.0.0.1:65319 - "GET /admin/ HTTP/1.1" 304 Not Modified
 INFO:     127.0.0.1:65319 - "GET /api/agents HTTP/1.1" 401 Unauthorized
 INFO:     127.0.0.1:65319 - "GET /api/agents HTTP/1.1" 200 OK
-2026-08-22 07:48:15,495 INFO adit-agent.store: Agent baru dibuat: id=45bd1d3ad738 platform=synology_bot name='Azza'
+2026-08-22 07:48:15,495 INFO adit-agent.store: Agent baru dibuat: id=45bd1d3ad738 platform=synology_bot name='TestBot'
 INFO:     127.0.0.1:65440 - "POST /api/agents HTTP/1.1" 201 Created
 INFO:     127.0.0.1:65440 - "GET /api/agents HTTP/1.1" 200 OK
 INFO:     127.0.0.1:65440 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
@@ -64,10 +64,10 @@ INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
 INFO:     127.0.0.1:49516 - "GET /healthz HTTP/1.1" 200 OK
-INFO:     192.168.x.x:49729 - "GET /webhook/synology/azza HTTP/1.1" 405 Method Not Allowed
+INFO:     192.168.x.x:49729 - "GET /webhook/synology/testbot HTTP/1.1" 405 Method Not Allowed
 INFO:     127.0.0.1:49741 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
 INFO:     127.0.0.1:49779 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
-INFO:     192.168.x.x:42110 - "POST /webhook/synology/azza HTTP/1.1" 200 OK
+INFO:     192.168.x.x:42110 - "POST /webhook/synology/testbot HTTP/1.1" 200 OK
 2026-08-22 08:00:16,579 INFO httpx: HTTP Request: POST http://127.0.0.1:8000/v1/chat/completions "HTTP/1.1 200 OK"
 2026-08-22 08:00:17,186 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
 INFO:     127.0.0.1:50206 - "GET /api/agents/45bd1d3ad738 HTTP/1.1" 200 OK
@@ -79,10 +79,10 @@ INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
 INFO:     127.0.0.1:50237 - "GET /healthz HTTP/1.1" 200 OK
-INFO:     192.168.x.x:42456 - "POST /webhook/synology/azza HTTP/1.1" 200 OK
+INFO:     192.168.x.x:42456 - "POST /webhook/synology/testbot HTTP/1.1" 200 OK
 2026-08-22 08:08:20,248 INFO httpx: HTTP Request: POST http://127.0.0.1:8000/v1/chat/completions "HTTP/1.1 200 OK"
 2026-08-22 08:08:21,078 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
-INFO:     192.168.x.x:42462 - "POST /webhook/synology/azza HTTP/1.1" 200 OK
+INFO:     192.168.x.x:42462 - "POST /webhook/synology/testbot HTTP/1.1" 200 OK
 2026-08-22 08:08:28,751 INFO httpx: HTTP Request: POST http://127.0.0.1:8000/v1/chat/completions "HTTP/1.1 200 OK"
 2026-08-22 08:08:29,857 INFO httpx: HTTP Request: POST https://<domain-nas-direstorasi>.synology.me:5001/webapi/entry.cgi?api=SYNO.Chat.External&method=chatbot&version=2&token=%22***REDACTED***%22 "HTTP/1.1 200 OK"
 2026-08-22 08:13:33,915 INFO adit-agent.store: Agent baru dibuat: id=2110b788c02a platform=synology_chat name='Adit'

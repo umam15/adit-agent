@@ -34,7 +34,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import store
+from . import __version__, store
 from .channels import build_adapter  # import ini juga memicu validasi
 # ADIT_AGENT_SECRET_KEY (lewat CHANNELS = load_channels() di
 # app/channels/__init__.py), gagal cepat saat startup kalau belum diisi --
@@ -46,7 +46,11 @@ from .api_admin import router as admin_router
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("adit-agent")
 
-app = FastAPI(title="adit-agent", description="Jembatan channel chat <-> server adit")
+app = FastAPI(
+    title="adit-agent",
+    description="Jembatan channel chat <-> server adit",
+    version=__version__,
+)
 
 # Sengaja TIDAK default ke "*" -- /api/agents/* membaca & menulis kredensial
 # channel (plus header Authorization admin kalau ADIT_AGENT_ADMIN_TOKEN
@@ -89,7 +93,7 @@ def healthz():
     # supaya /healthz selalu mencerminkan status agent yang sebenarnya,
     # konsisten dengan webhook_dispatch yang juga selalu baca database.
     records = store.list_agents(active_only=True)
-    return {"status": "ok", "channels": [r.name for r in records]}
+    return {"status": "ok", "version": __version__, "channels": [r.name for r in records]}
 
 
 def _make_webhook_handler(adapter: ChannelAdapter):
