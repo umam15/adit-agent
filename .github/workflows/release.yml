@@ -1,7 +1,5 @@
 name: Auto Release
 
-# Jalan otomatis tiap kali CHANGELOG.md berubah di branch main.
-# Bisa juga dipicu manual lewat tab "Actions" -> "Auto Release" -> "Run workflow".
 on:
   push:
     branches: [main]
@@ -10,27 +8,29 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # perlu untuk push tag baru + membuat release
+  contents: write
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/adit-agent
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0     # ambil semua history + tag, biar bisa dicek tag mana yang sudah ada
+          fetch-depth: 0
           fetch-tags: true
 
-      - name: Ambil versi & catatan rilis dari CHANGELOG.md
+      - name: Extract version and release notes
         id: changelog
         shell: bash
         run: |
           set -euo pipefail
 
-          # Ambil nomor versi dari heading paling atas, format: "## [1.2.5]" atau "## [1.2.5-beta]"
-          # (boleh ada suffix pre-release seperti -beta, dan boleh ada tanggal setelahnya)
-          VERSION=$(grep -m1 -oP '(?<=^## \[)[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?=\])' CHANGELOG.md || true)
+          VERSION=$(grep -m1 -E '^## \[[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?\]' CHANGELOG.md \
+            | sed -E 's/^## \[//; s/\].*$//') || true
 
           if [ -z "$VERSION" ]; then
             echo "::error::Tidak menemukan heading versi (## [x.y.z]) di CHANGELOG.md"
@@ -41,8 +41,6 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-          # Ambil isi dari heading versi tsb sampai sebelum heading "## [" berikutnya,
-          # atau sebelum daftar link referensi "[versi]: url" di bagian bawah file.
           awk -v ver="$VERSION" '
             BEGIN { found = 0 }
             /^## \[/ {
@@ -54,25 +52,26 @@ jobs:
             found == 1 { print }
           ' CHANGELOG.md > release_notes.md
 
-          # Buang baris kosong di awal/akhir file catatan rilis
           sed -i -e '/./,$!d' release_notes.md
           tac release_notes.md | sed -e '/./,$!d' | tac > release_notes.tmp && mv release_notes.tmp release_notes.md
 
           echo "----- release_notes.md -----"
           cat release_notes.md
 
-      - name: Cek apakah tag sudah pernah dibuat
-        id: tagcheck
+      - name: Check whether GitHub Release already exists
+        id: releasecheck
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if git rev-parse "${{ steps.changelog.outputs.tag }}" >/dev/null 2>&1; then
+          if gh release view "${{ steps.changelog.outputs.tag }}" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Buat tag & GitHub Release
-        if: steps.tagcheck.outputs.exists == 'false'
+      - name: Create tag and GitHub Release
+        if: steps.releasecheck.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.changelog.outputs.tag }}
@@ -80,42 +79,36 @@ jobs:
           body_path: release_notes.md
           target_commitish: ${{ github.sha }}
 
-      - name: Info kalau tag sudah ada (tidak dibuat ulang)
-        if: steps.tagcheck.outputs.exists == 'true'
-        run: echo "Tag ${{ steps.changelog.outputs.tag }} sudah ada, dilewati."
-
-      # --- Docker: digabung ke sini supaya tag rilis ikut di-push ---
-      # (Sebelumnya dipisah di docker-publish.yml, tapi tag yang dibuat lewat
-      #  GITHUB_TOKEN tidak men-trigger workflow lain, jadi cuma `latest` yang kepush.)
+      - name: Report existing release
+        if: steps.releasecheck.outputs.exists == 'true'
+        run: echo "GitHub Release ${{ steps.changelog.outputs.tag }} sudah ada, dilewati."
 
       - name: Log in to Docker Hub
-        if: steps.tagcheck.outputs.exists == 'false'
+        if: steps.releasecheck.outputs.exists == 'false'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Susun daftar tag Docker
+      - name: Build Docker tag list
         id: docker-tags
-        if: steps.tagcheck.outputs.exists == 'false'
+        if: steps.releasecheck.outputs.exists == 'false'
         shell: bash
         run: |
           set -euo pipefail
-          IMG="${{ secrets.DOCKERHUB_USERNAME }}/adit"
           VERSION="${{ steps.changelog.outputs.version }}"
 
-          TAGS="${IMG}:${VERSION}"
-          # Tag major.minor (mis. 1.4) hanya untuk rilis stabil, bukan pre-release
+          TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
           if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            TAGS="${TAGS},${IMG}:${VERSION%.*}"
+            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${VERSION%.*}"
           fi
-          TAGS="${TAGS},${IMG}:latest"
+          TAGS="${TAGS},${{ env.IMAGE_NAME }}:latest"
 
           echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
-          echo "Docker tags yang akan di-push: ${TAGS}"
+          echo "Docker tags: ${TAGS}"
 
-      - name: Build and push Docker image
-        if: steps.tagcheck.outputs.exists == 'false'
+      - name: Build and push image
+        if: steps.releasecheck.outputs.exists == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
