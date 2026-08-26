@@ -1,28 +1,42 @@
-# Contoh menjalankan adit-agent + server adit dalam satu network, supaya
-# ADIT_BASE_URL bisa pakai nama service ("http://adit-server:8000") tanpa
-# perlu expose port adit ke luar sama sekali -- cuma adit-agent yang perlu
-# publik-facing (buat menerima webhook dari Synology Chat).
+# Menjalankan adit-agent + server adit dalam satu network, supaya
+# ADIT_BASE_URL agent bisa pakai nama service adit tanpa perlu expose port
+# adit ke luar sama sekali -- cuma adit-agent yang perlu publik-facing
+# (buat menerima webhook dari Synology Chat).
 #
-# Sesuaikan `context: ../adit` supaya menunjuk ke folder server adit di
-# komputer Anda. Isi SYNOLOGY_OUTGOING_TOKEN dan SYNOLOGY_INCOMING_WEBHOOK_URL
-# di file .env (salin dari .env.example) sebelum `docker compose up`.
+# Semua nilai yang mungkin beda per mesin/deployment diatur lewat .env
+# (lihat .env.example) -- diseragamkan dengan pola di adit-console/adit-chat
+# (ADIT_SERVER_HOST/ADIT_SERVER_PORT/ADIT_SERVER_CONTEXT), plus variable
+# khusus adit-agent sendiri (kredensial Synology, admin, dst).
+#
+# Jalankan dari folder ini: docker compose up --build
 
 services:
-  adit-server:
+  adit:
     build:
-      context: ../adit
+      context: ${ADIT_SERVER_CONTEXT}
+    container_name: ${ADIT_SERVER_HOST}
     volumes:
-      - ../adit/checkpoints:/app/checkpoints
-      - ../adit/data:/app/data
-    # tidak perlu "ports:" -- cukup diakses dari adit-agent lewat network
+      - ${ADIT_SERVER_CONTEXT}/checkpoints:/app/checkpoints
+      - ${ADIT_SERVER_CONTEXT}/data:/app/data
+    # TIDAK ada "ports:" di sini secara sengaja -- beda dari
+    # adit-console/adit-chat, server cukup diakses adit-agent lewat network
     # internal docker compose, tidak perlu diekspos ke host/internet.
 
-  adit-agent:
+  agent:
     build: .
     env_file: .env
     environment:
-      ADIT_BASE_URL: http://adit-server:8000
+      # Dibangun dari ADIT_SERVER_HOST/PORT (variable yang sama dengan
+      # adit-console/adit-chat) supaya satu source of truth. Ini override
+      # baris ADIT_BASE_URL=http://localhost:8000 di .env -- baris itu cuma
+      # dipakai kalau adit-agent dijalankan TANPA docker compose (langsung
+      # terhubung ke adit yang jalan di host, bukan di network compose ini).
+      ADIT_BASE_URL: http://${ADIT_SERVER_HOST}:${ADIT_SERVER_PORT}
     ports:
-      - "9000:9000"   # ini yang perlu bisa diakses dari luar (buat webhook Synology)
+      - "${AGENT_PORT}:9000"   # publik-facing -- buat webhook Synology
+    # CATATAN: "adit" di bawah ini merujuk ke KEY service di atas (baris
+    # "adit:"), bukan ke nilai ADIT_SERVER_HOST -- docker-compose tidak
+    # mendukung variable di posisi ini, jadi key ini tetap literal secara
+    # sengaja (sama seperti di adit-console/adit-chat).
     depends_on:
-      - adit-server
+      - adit

@@ -9,6 +9,28 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.4.7] - 2026-08-27
+
+### Diubah
+- `docker-compose.yml`: nama service diseragamkan dengan
+  `adit-console`/`adit-chat` — `adit-server` → `adit`, `adit-agent` → `agent`.
+- Path build context (`context: ../adit`) dan `ADIT_BASE_URL` (sebelumnya
+  hardcoded `http://adit-server:8000`) tidak lagi hardcoded di
+  `docker-compose.yml` — sekarang dibangun dari `ADIT_SERVER_HOST` /
+  `ADIT_SERVER_PORT` / `ADIT_SERVER_CONTEXT` di `.env`, variable yang sama
+  dengan `adit-console`/`adit-chat`.
+- Port publik webhook (`9000:9000`) tidak lagi hardcoded — sekarang lewat
+  `AGENT_PORT` di `.env`.
+- Ditambahkan catatan eksplisit di `docker-compose.yml` kenapa
+  `depends_on: - adit` tetap literal, dan kenapa baris
+  `ADIT_BASE_URL=http://localhost:8000` di `.env.example` cuma berlaku
+  untuk jalur non-Docker (di-override otomatis oleh compose).
+
+### Ditambahkan
+- `.env.example`: variable baru `ADIT_SERVER_HOST`, `ADIT_SERVER_PORT`,
+  `ADIT_SERVER_CONTEXT`, `AGENT_PORT` — khusus dipakai `docker-compose.yml`,
+  tidak dibaca langsung oleh app Python.
+
 ## [0.4.6] - 2026-08-24
 
 Rilis housekeeping -- tidak ada perubahan perilaku, murni kerapian repo dan
