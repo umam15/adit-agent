@@ -23,7 +23,14 @@ services:
     # internal docker compose, tidak perlu diekspos ke host/internet.
 
   agent:
+    # "build" dipakai kalau menjalankan "docker compose up --build" (build
+    # lokal dari source). "image" menunjuk ke image yang sama yang
+    # dipublish otomatis oleh CI ke Docker Hub (lihat
+    # docs/release-process.md) -- kalau TIDAK mau build lokal, jalankan
+    # "docker compose pull agent" lalu "docker compose up" (tanpa --build)
+    # supaya compose langsung pakai image publik ini alih-alih build.
     build: .
+    image: endsho/adit-agent:${AGENT_IMAGE_TAG:-latest}
     env_file: .env
     environment:
       # Dibangun dari ADIT_SERVER_HOST/PORT (variable yang sama dengan

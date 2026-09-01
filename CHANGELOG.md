@@ -9,6 +9,16 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-09-01
+
+### Ditambahkan
+- `docker-compose.yml`: service `agent` sekarang punya `image:
+  endsho/adit-agent:${AGENT_IMAGE_TAG:-latest}` di samping `build: .` --
+  jalankan `docker compose pull agent` lalu `docker compose up` (tanpa
+  `--build`) untuk pakai image publik dari Docker Hub alih-alih build
+  lokal. Variabel opsional `AGENT_IMAGE_TAG` ditambahkan di `.env.example`
+  untuk mengunci ke versi tertentu.
+
 ## [0.5.0] - 2026-09-01
 
 ### Ditambahkan
