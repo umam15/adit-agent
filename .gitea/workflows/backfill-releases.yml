@@ -72,18 +72,24 @@ jobs:
             mv "${notes_file}.trimmed" "$notes_file"
 
             BODY_JSON=$(jq -Rs . < "$notes_file")
+            if [[ "$version" == *-* ]]; then
+              is_prerelease=true
+            else
+              is_prerelease=false
+            fi
             PAYLOAD=$(jq -n \
               --arg tag "$tag" \
               --arg name "$tag" \
               --arg target "${{ github.sha }}" \
               --argjson body "$BODY_JSON" \
+              --argjson prerelease "$is_prerelease" \
               '{
                 tag_name: $tag,
                 name: $name,
                 body: $body,
                 target_commitish: $target,
                 draft: false,
-                prerelease: false
+                prerelease: $prerelease
               }')
 
             echo "Release $tag belum ada, membuat release..."

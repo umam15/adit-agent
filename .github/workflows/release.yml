@@ -41,6 +41,14 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
+          # Versi dengan akhiran pre-release (mis. 1.23.0-beta) ditandai
+          # sebagai prerelease di GitHub, bukan rilis stabil biasa.
+          if [[ "$VERSION" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
           awk -v ver="$VERSION" '
             BEGIN { found = 0 }
             /^## \[/ {
@@ -78,6 +86,7 @@ jobs:
           name: "${{ steps.changelog.outputs.tag }}"
           body_path: release_notes.md
           target_commitish: ${{ github.sha }}
+          prerelease: ${{ steps.changelog.outputs.prerelease }}
 
       - name: Report existing release
         if: steps.releasecheck.outputs.exists == 'true'

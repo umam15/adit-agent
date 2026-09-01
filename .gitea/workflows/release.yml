@@ -45,6 +45,14 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
+          # Versi dengan akhiran pre-release (mis. 1.23.0-beta) ditandai
+          # sebagai prerelease di Gitea, bukan rilis stabil biasa.
+          if [[ "$VERSION" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
           awk -v ver="$VERSION" '
             BEGIN { found = 0 }
             /^## \[/ {
@@ -107,13 +115,14 @@ jobs:
             --arg name "${{ steps.changelog.outputs.tag }}" \
             --arg target "${{ github.sha }}" \
             --argjson body "$BODY_JSON" \
+            --argjson prerelease "${{ steps.changelog.outputs.prerelease }}" \
             '{
               tag_name: $tag,
               name: $name,
               body: $body,
               target_commitish: $target,
               draft: false,
-              prerelease: false
+              prerelease: $prerelease
             }')
 
           HTTP_CODE=$(curl -sS -o /tmp/gitea_release_create.json -w '%{http_code}' -X POST \

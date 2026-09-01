@@ -59,9 +59,9 @@ jobs:
             mv "${notes_file}.trimmed" "$notes_file"
 
             echo "Release $tag belum ada, membuat release..."
-            gh release create "$tag" \
-              --title "$tag" \
-              --notes-file "$notes_file" \
-              --target "$GITHUB_SHA" \
-              --latest=false
+            release_flags=(--title "$tag" --notes-file "$notes_file" --target "$GITHUB_SHA" --latest=false)
+            if [[ "$version" == *-* ]]; then
+              release_flags+=(--prerelease)
+            fi
+            gh release create "$tag" "${release_flags[@]}"
           done < "$versions_file"

@@ -9,6 +9,21 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-01
+
+### Ditambahkan
+- Otomasi rilis lewat CI: setiap `CHANGELOG.md` dapat heading versi baru
+  (`## [x.y.z]`) di-push ke `main`, tag + Release (isi otomatis dari
+  section changelog terkait) dan image Docker (`endsho/adit-agent`) dibuat
+  otomatis -- berlaku paralel di GitHub Actions (`.github/workflows/`) dan
+  Gitea Actions (`.gitea/workflows/`). Push biasa (tanpa perubahan
+  `CHANGELOG.md`) tetap mem-build & push image `:latest`, tanpa buat
+  Release baru. Detail alur & secret yang dibutuhkan di
+  `docs/release-process.md`.
+- `backfill-releases.yml`: workflow manual sekali-jalan untuk membuat
+  Release yang tertinggal dari riwayat versi lama di `CHANGELOG.md`.
+- `LICENSE` (MIT, endsho) -- sebelumnya belum ada di repo ini.
+
 ## [0.4.8] - 2026-09-01
 
 ### Diperbaiki

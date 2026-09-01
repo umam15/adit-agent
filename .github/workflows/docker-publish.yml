@@ -19,14 +19,39 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # paths-ignore di atas cuma skip kalau SEMUA file yang berubah ada di
+      # daftar ignore. Kalau satu push menyentuh CHANGELOG.md DAN file lain
+      # sekaligus (kasus umum commit rilis), workflow ini tetap terpicu
+      # berbarengan dengan release.yml -> build & push image dobel. Step ini
+      # skip sisa job kalau CHANGELOG.md ikut berubah, biar release.yml yang
+      # menangani publish image untuk commit rilis.
+      - name: Skip kalau CHANGELOG.md ikut berubah (ditangani release.yml)
+        id: skip-check
+        run: |
+          set -euo pipefail
+          BEFORE_SHA="${{ github.event.before }}"
+          if [[ "$BEFORE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BEFORE_SHA" 2>/dev/null; then
+            # Branch baru / force-push tak dikenal -> tidak bisa diff, anggap normal.
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BEFORE_SHA" "${{ github.sha }}" | grep -qx 'CHANGELOG.md'; then
+            echo "Push ini juga mengubah CHANGELOG.md, dilewati (jadi tugas release.yml)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Log in to Docker Hub
+        if: steps.skip-check.outputs.skip == 'false'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push image
+        if: steps.skip-check.outputs.skip == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
