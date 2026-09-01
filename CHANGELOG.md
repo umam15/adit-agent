@@ -9,6 +9,19 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.4.8] - 2026-09-01
+
+### Diperbaiki
+- `app/web/index.html`: opsi platform **Telegram** di modal "Tambah agent"
+  sebelumnya bisa diklik dan diisi kredensialnya penuh, padahal
+  `TelegramAdapter` belum ada di backend (`app/channels/__init__.py`) --
+  submit selalu berakhir `400 Platform 'telegram' tidak dikenal` setelah
+  user mengisi form. Sekarang opsi ini tampil dengan label "Segera hadir",
+  tidak bisa diklik untuk lanjut ke form kredensial.
+- `README.md`: kalimat yang menyiratkan Telegram sudah bisa disambungkan
+  sekarang diperbaiki jadi "segera menyusul", konsisten dengan status di
+  `TODO.md` ("Prioritas menengah -- `TelegramAdapter` sungguhan").
+
 ## [0.4.7] - 2026-08-27
 
 ### Diubah

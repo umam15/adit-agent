@@ -1,9 +1,9 @@
 # adit-agent
 
 Penghubung antara aplikasi chat yang kamu pakai sehari-hari (**Synology
-Chat**, **Synology Bot**, dan **Telegram** — makin banyak akan menyusul)
-dengan **adit**, asisten yang menjawab pertanyaan. Cukup pasang sekali,
-lalu tanya lewat aplikasi chat yang biasa kamu buka.
+Chat** dan **Synology Bot** — **Telegram** segera menyusul) dengan **adit**,
+asisten yang menjawab pertanyaan. Cukup pasang sekali, lalu tanya lewat
+aplikasi chat yang biasa kamu buka.
 
 Semua pengaturan channel chat — token, URL, aktif/nonaktif — dikelola
 lewat satu **panel admin di browser**, tidak perlu edit file konfigurasi
@@ -30,8 +30,9 @@ docker compose up --build
 
 Buka **`http://<alamat-server>:9000/admin`** di browser.
 
-1. Klik **"Tambah agent"**, pilih platform (Synology Chat, Synology Bot,
-   atau Telegram).
+1. Klik **"Tambah agent"**, pilih platform (Synology Chat atau Synology
+   Bot — Telegram tampil di panel tapi belum bisa disambungkan, lihat
+   `TODO.md`).
 2. Isi nama agent dan kredensial yang diminta — panel akan menampilkan
    URL webhook yang perlu kamu daftarkan balik di sisi Synology/Telegram.
    Langkah detail per platform ada di:
@@ -41,10 +42,10 @@ Buka **`http://<alamat-server>:9000/admin`** di browser.
 4. Nyalakan toggle **Aktif**, simpan — **langsung aktif menerima pesan
    saat itu juga, tidak perlu restart adit-agent.**
 
-Boleh menambah lebih dari satu agent sekaligus — misalnya dua bot
-Telegram untuk dua grup berbeda, atau Synology Chat sekaligus Synology Bot
-dari NAS yang sama — masing-masing berjalan dan bisa dinyalakan/dimatikan
-sendiri-sendiri, kapan saja, tanpa saling ganggu.
+Boleh menambah lebih dari satu agent sekaligus — misalnya Synology Chat
+sekaligus Synology Bot dari NAS yang sama — masing-masing berjalan dan
+bisa dinyalakan/dimatikan sendiri-sendiri, kapan saja, tanpa saling
+ganggu.
 
 ## Kalau server ini tidak bisa langsung dijangkau dari internet
 

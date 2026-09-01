@@ -1,8 +1,8 @@
 name: Auto Release
 
 # Gitea Actions membaca workflow dari .gitea/workflows/ (BUKAN .github/workflows/).
-# Jalan otomatis tiap kali CHANGELOG.md berubah di branch main.
-# Ganti "main" jika branch default repo kamu "master".
+# Workflow ini membaca versi paling atas dari CHANGELOG.md lalu membuat release
+# di Gitea berdasarkan isi section changelog tersebut.
 on:
   push:
     branches: [main]
@@ -13,19 +13,29 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Ambil versi & catatan rilis dari CHANGELOG.md
+      - name: Parse latest version from CHANGELOG.md
         id: changelog
         shell: bash
         run: |
           set -euo pipefail
 
-          VERSION=$(grep -m1 -oP '(?<=^## \[)[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?(?=\])' CHANGELOG.md || true)
+          if [ ! -f CHANGELOG.md ]; then
+            echo "::error::CHANGELOG.md tidak ditemukan."
+            exit 1
+          fi
+
+          VERSION=$(grep -m1 -E '^## \[[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?\]' CHANGELOG.md \
+            | sed -E 's/^## \[//; s/\].*$//' || true)
+
           if [ -z "$VERSION" ]; then
             echo "::error::Tidak menemukan heading versi (## [x.y.z]) di CHANGELOG.md"
             exit 1
@@ -35,8 +45,6 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-          # Ambil isi dari heading versi tsb sampai sebelum heading "## [" berikutnya,
-          # atau sebelum daftar link referensi "[versi]: url" di bagian bawah file.
           awk -v ver="$VERSION" '
             BEGIN { found = 0 }
             /^## \[/ {
@@ -48,61 +56,81 @@ jobs:
             found == 1 { print }
           ' CHANGELOG.md > release_notes.md
 
-          # Buang baris kosong di awal/akhir
-          sed -i -e '/./,$!d' release_notes.md
-          tac release_notes.md | sed -e '/./,$!d' | tac > release_notes.tmp && mv release_notes.tmp release_notes.md
+          sed -i '/./,$!d' release_notes.md
+          tac release_notes.md | sed '/./,$!d' | tac > release_notes.tmp
+          mv release_notes.tmp release_notes.md
 
+          echo "Version: ${VERSION}"
+          echo "Tag: ${TAG}"
           echo "----- release_notes.md -----"
           cat release_notes.md
 
-      - name: Cek apakah release/tag sudah ada di Gitea
+      - name: Cek apakah release sudah ada di Gitea
         id: tagcheck
         shell: bash
         env:
-          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITEA_API_URL: ${{ github.api_url }}
         run: |
           set -euo pipefail
-          API="${{ github.api_url }}/repos/${{ github.repository }}"
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+
+          API="${GITEA_API_URL:-${{ github.api_url }}}/repos/${{ github.repository }}"
+          STATUS=$(curl -sS -o /tmp/gitea_release_check.json -w '%{http_code}' \
             -H "Authorization: token ${GITEA_TOKEN}" \
             "${API}/releases/tags/${{ steps.changelog.outputs.tag }}")
+
           if [ "$STATUS" = "200" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Buat tag & Release lewat Gitea API
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "404" ]; then
+            cat /tmp/gitea_release_check.json
+            echo "::error::Gagal mengecek release ${{ steps.changelog.outputs.tag }}, HTTP $STATUS"
+            exit 1
+          fi
+
+      - name: Buat release Gitea dari changelog
         if: steps.tagcheck.outputs.exists == 'false'
         shell: bash
         env:
-          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITEA_API_URL: ${{ github.api_url }}
         run: |
           set -euo pipefail
-          API="${{ github.api_url }}/repos/${{ github.repository }}"
-          BODY_JSON=$(jq -Rs . < release_notes.md)
 
-          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" -X POST \
+          API="${GITEA_API_URL:-${{ github.api_url }}}/repos/${{ github.repository }}"
+          BODY_JSON=$(jq -Rs . < release_notes.md)
+          PAYLOAD=$(jq -n \
+            --arg tag "${{ steps.changelog.outputs.tag }}" \
+            --arg name "${{ steps.changelog.outputs.tag }}" \
+            --arg target "${{ github.sha }}" \
+            --argjson body "$BODY_JSON" \
+            '{
+              tag_name: $tag,
+              name: $name,
+              body: $body,
+              target_commitish: $target,
+              draft: false,
+              prerelease: false
+            }')
+
+          HTTP_CODE=$(curl -sS -o /tmp/gitea_release_create.json -w '%{http_code}' -X POST \
             -H "Authorization: token ${GITEA_TOKEN}" \
             -H "Content-Type: application/json" \
             "${API}/releases" \
-            -d "{
-              \"tag_name\": \"${{ steps.changelog.outputs.tag }}\",
-              \"name\": \"${{ steps.changelog.outputs.tag }}\",
-              \"body\": ${BODY_JSON},
-              \"target_commitish\": \"${{ github.sha }}\",
-              \"draft\": false,
-              \"prerelease\": false
-            }")
+            -d "$PAYLOAD")
 
-          cat response.json
+          cat /tmp/gitea_release_create.json
           if [ "$HTTP_CODE" -ge 300 ]; then
-            echo "::error::Gagal membuat release, HTTP $HTTP_CODE"
+            echo "::error::Gagal membuat release ${{ steps.changelog.outputs.tag }}, HTTP $HTTP_CODE"
             exit 1
           fi
+
           echo "Release ${{ steps.changelog.outputs.tag }} berhasil dibuat."
 
-      - name: Info kalau tag/release sudah ada
+      - name: Info jika release sudah ada
         if: steps.tagcheck.outputs.exists == 'true'
         shell: bash
         run: echo "Release ${{ steps.changelog.outputs.tag }} sudah ada, dilewati."
