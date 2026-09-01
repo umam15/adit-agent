@@ -5,6 +5,16 @@
 > (pengujian penerapan 0.4.2 → 0.4.4 + verifikasi end-to-end Synology Chat
 > asli). Baca laporan itu untuk log mentah & konteks lengkap tiap temuan.
 
+## Selesai di 0.6.0
+
+- [x] **Tema panel admin diseragamkan dengan `adit-admin`** — lihat
+  `CHANGELOG.md` 0.6.0. `app/web/index.html` sekarang pakai token warna &
+  tipografi yang sama dengan dashboard `adit-admin`.
+- [x] **Panel admin lepas dari CDN eksternal** — font ikon tabler-icons
+  diganti SVG inline, panel bisa dibuka tanpa koneksi internet.
+- [x] **`VERSION` sebagai satu-satunya sumber nomor versi** — sebelumnya
+  hardcode string di `app/__init__.py`.
+
 ## Selesai di 0.4.6
 
 - [x] **Versi aplikasi bisa dicek dari luar** — `__version__` di

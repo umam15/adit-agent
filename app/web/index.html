@@ -3,127 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <title>adit-agent — Panel Admin</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
 <style>
+  /*
+    Tema: adit-admin -- token warna & tipografi sama persis dengan dashboard
+    adit-admin, supaya seluruh panel admin adit-* konsisten satu tampilan.
+    Charcoal hangat + aksen gold, warna status fungsional (bukan aksen
+    dekoratif): hijau = aktif, gold = aksi utama, merah = hapus/bahaya.
+    Tidak ada font/ikon dari CDN -- semua aset lokal, panel jalan offline.
+  */
   :root{
-    --page:#EEF1F0; --card:#FFFFFF; --line:#DDE3E1; --line-strong:#C6CEC9;
-    --ink:#1B221F; --ink-2:#5B655F; --ink-3:#8A928C;
-    --accent:#0F6E56; --accent-bg:#E1F5EE; --accent-strong:#085041;
-    --warn:#854F0B; --warn-bg:#FAEEDA;
-    --danger:#A32D2D; --danger-bg:#FCEBEB; --gray-bg:#F1EFE8;
-    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-    --radius:10px;
+    --bg:#14161c; --panel:#1c1f27; --panel-alt:#21242d; --panel-raised:#262a34;
+    --border:#2c3039; --border-soft:#23262f;
+    --text:#ece9e2; --text-muted:#8b8d97; --text-faint:#5c5f6a;
+    --accent:#e0a458; --accent-dim:#b8854a; --accent-ink:#1a1408;
+    --ok:#6fcf97; --ok-dim:#3e5c4c;
+    --warn:#e8926b; --warn-dim:#6b4b3c;
+    --danger:#e8546a; --danger-dim:#6b3540;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius:6px; --radius-lg:10px;
+    --shadow: 0 8px 24px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:var(--sans);background:var(--page);color:var(--ink);}
+  body{margin:0;font-family:var(--sans);font-size:14px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .icon{display:inline-flex;width:15px;height:15px;vertical-align:-3px;flex-shrink:0;}
+  .icon svg{width:100%;height:100%;}
   .app{max-width:1120px;margin:0 auto;padding:28px 24px 64px;}
-  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;}
   .brand{display:flex;align-items:center;gap:10px;}
-  .brand .mark{width:32px;height:32px;border-radius:8px;background:var(--accent-strong);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-family:var(--mono);}
-  .brand-text h1{font-size:16px;margin:0;font-weight:600;}
-  .brand-text p{font-size:12px;margin:0;color:var(--ink-2);}
+  .brand .mark{width:32px;height:32px;border-radius:var(--radius);background:var(--panel-raised);border:1px solid var(--border);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;font-family:var(--mono);}
+  .brand-text h1{font-size:16px;margin:0;font-weight:650;font-family:var(--mono);}
+  .brand-text p{font-size:12px;margin:0;color:var(--text-muted);}
   .topbar-actions{display:flex;gap:10px;align-items:center;}
-  .server-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:var(--card);border:1px solid var(--line);padding:6px 10px;border-radius:20px;}
-  .server-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  .server-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);background:var(--panel);border:1px solid var(--border);padding:6px 10px;border-radius:20px;font-family:var(--mono);}
+  .server-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
   .server-pill.err .dot{background:var(--danger);}
-  .btn{font-family:var(--sans);font-size:13px;font-weight:500;border-radius:8px;padding:8px 14px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s;}
-  .btn:hover{background:var(--gray-bg);}
-  .btn-primary{background:var(--accent-strong);border-color:var(--accent-strong);color:#fff;}
-  .btn-primary:hover{background:#063d32;}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:550;border-radius:var(--radius);padding:8px 14px;border:1px solid var(--border);background:var(--panel-alt);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color .12s;}
+  .btn:hover{border-color:var(--text-faint);}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .btn-primary:hover{background:#eab06a;}
   .btn-danger-text{border:none;background:none;color:var(--danger);padding:6px 0;}
   .btn-sm{padding:5px 10px;font-size:12px;}
   .btn:disabled{opacity:.45;cursor:not-allowed;}
   .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
-  .metric{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;}
-  .metric .label{font-size:12px;color:var(--ink-2);margin-bottom:6px;}
-  .metric .value{font-size:22px;font-weight:600;}
-  .metric .value.ok{color:var(--accent-strong);}
+  .metric{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;}
+  .metric .label{font-size:12px;color:var(--text-muted);margin-bottom:6px;}
+  .metric .value{font-size:22px;font-weight:600;font-family:var(--mono);}
+  .metric .value.ok{color:var(--ok);}
   .metric .value.warn{color:var(--warn);}
   .section-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px;}
-  .section-head h2{font-size:14px;font-weight:600;margin:0;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;}
+  .section-head h2{font-size:13px;font-weight:600;margin:0;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:border-color .12s, box-shadow .12s;}
-  .card:hover{border-color:var(--line-strong);box-shadow:0 1px 6px rgba(20,30,26,.06);}
+  @media (max-width:860px){ .summary{grid-template-columns:repeat(2,1fr);} .grid{grid-template-columns:1fr;} }
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:border-color .12s, box-shadow .12s;}
+  .card:hover{border-color:var(--text-faint);box-shadow:var(--shadow);}
   .card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
-  .platform-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-  .pi-synology_chat{background:var(--accent-bg);color:var(--accent-strong);}
-  .pi-synology_bot{background:#EEEDFE;color:#3C3489;}
-  .pi-telegram{background:#E6F1FB;color:#0C447C;}
-  .status-row{display:flex;align-items:center;gap:6px;font-size:12px;}
+  .platform-icon{width:34px;height:34px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .platform-icon .icon{width:17px;height:17px;}
+  .pi-synology_chat{background:var(--ok-dim);color:var(--ok);}
+  .pi-synology_bot{background:var(--panel-raised);color:var(--accent);}
+  .pi-telegram{background:var(--panel-raised);color:var(--text-muted);}
+  .status-row{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);}
   .status-dot{width:7px;height:7px;border-radius:50%;}
-  .status-active .status-dot{background:var(--accent);}
-  .status-active{color:var(--accent-strong);}
-  .status-inactive .status-dot{background:var(--ink-3);}
-  .status-inactive{color:var(--ink-3);}
+  .status-active .status-dot{background:var(--ok);}
+  .status-active{color:var(--ok);}
+  .status-inactive .status-dot{background:var(--text-faint);}
+  .status-inactive{color:var(--text-faint);}
   .card h3{font-size:14px;margin:0 0 3px;font-weight:600;}
-  .card .subtitle{font-size:12px;color:var(--ink-2);margin:0 0 12px;}
-  .card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:2px;}
-  .webhook-path{font-family:var(--mono);font-size:11px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;}
-  .card-add{border:1.5px dashed var(--line-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink-2);min-height:158px;background:transparent;}
-  .card-add:hover{border-color:var(--accent);color:var(--accent-strong);background:var(--accent-bg);}
-  .card-add i{font-size:22px;}
+  .card .subtitle{font-size:12px;color:var(--text-muted);margin:0 0 12px;}
+  .card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-soft);padding-top:10px;margin-top:2px;}
+  .webhook-path{font-family:var(--mono);font-size:11px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;}
+  .card-add{border:1.5px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);min-height:158px;background:transparent;}
+  .card-add:hover{border-color:var(--accent);color:var(--accent);background:var(--panel-alt);}
+  .card-add .icon{width:22px;height:22px;}
   .card-add span{font-size:13px;font-weight:500;}
-  .empty-state{grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--ink-2);font-size:13px;}
-  .overlay{position:fixed;inset:0;background:rgba(20,26,23,.38);display:none;align-items:stretch;justify-content:flex-end;z-index:50;}
+  .empty-state{grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px;}
+  .overlay{position:fixed;inset:0;background:rgba(10,11,14,.6);display:none;align-items:stretch;justify-content:flex-end;z-index:50;}
   .overlay.show{display:flex;}
   .overlay.center{align-items:center;justify-content:center;}
-  .drawer{width:420px;max-width:92vw;background:var(--card);height:100%;overflow-y:auto;padding:22px 22px 40px;box-shadow:-8px 0 24px rgba(0,0,0,.08);}
+  .drawer{width:420px;max-width:92vw;background:var(--panel);border-left:1px solid var(--border);height:100%;overflow-y:auto;padding:22px 22px 40px;box-shadow:var(--shadow);}
   .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
-  .drawer-head .name-input{font-size:17px;font-weight:600;border:none;background:none;padding:2px 0;width:100%;border-bottom:1px solid transparent;}
-  .drawer-head .name-input:focus{outline:none;border-bottom:1px solid var(--line-strong);}
-  .icon-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;}
-  .icon-btn:hover{background:var(--gray-bg);}
+  .drawer-head .name-input{font-size:17px;font-weight:600;border:none;background:none;padding:2px 0;width:100%;border-bottom:1px solid transparent;color:var(--text);}
+  .drawer-head .name-input:focus{outline:none;border-bottom:1px solid var(--border);}
+  .icon-btn{width:28px;height:28px;border-radius:var(--radius);border:none;background:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{background:var(--panel-alt);color:var(--text);}
   .badge-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
-  .badge{font-size:11px;padding:3px 9px;border-radius:12px;font-weight:500;}
-  .badge-type{background:var(--gray-bg);color:var(--ink-2);}
-  .toggle{position:relative;width:38px;height:22px;border-radius:12px;background:var(--line-strong);cursor:pointer;flex-shrink:0;transition:background .15s;}
-  .toggle.on{background:var(--accent);}
-  .toggle .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;}
-  .toggle.on .knob{left:18px;}
+  .badge{font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600;font-family:var(--mono);}
+  .badge-type{background:var(--panel-raised);color:var(--text-muted);}
+  .toggle{position:relative;width:38px;height:22px;border-radius:12px;background:var(--panel-raised);border:1px solid var(--border);cursor:pointer;flex-shrink:0;transition:background .15s,border-color .15s;}
+  .toggle.on{background:var(--ok-dim);border-color:var(--ok);}
+  .toggle .knob{position:absolute;top:1px;left:1px;width:18px;height:18px;border-radius:50%;background:var(--text-faint);transition:left .15s,background .15s;}
+  .toggle.on .knob{left:17px;background:var(--ok);}
   .field-group{margin-bottom:18px;}
-  .field-group .fg-label{font-size:11px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;display:block;}
-  .secret-input{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--gray-bg);}
-  .secret-input input{border:none;background:none;font-family:var(--mono);font-size:12.5px;flex:1;min-width:0;color:var(--ink);}
+  .field-group .fg-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;display:block;}
+  .secret-input{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:var(--radius);padding:7px 8px;background:var(--panel-alt);}
+  .secret-input input{border:none;background:none;font-family:var(--mono);font-size:12.5px;flex:1;min-width:0;color:var(--text);}
   .secret-input input:focus{outline:none;}
-  .secret-input .icon-btn{width:22px;height:22px;font-size:14px;}
-  .webhook-box{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--accent-bg);}
-  .webhook-box code{font-family:var(--mono);font-size:11.5px;color:var(--accent-strong);flex:1;overflow-x:auto;white-space:nowrap;}
-  .hint{font-size:11.5px;color:var(--ink-3);margin-top:5px;line-height:1.5;}
+  .secret-input .icon-btn{width:22px;height:22px;}
+  .webhook-box{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:var(--radius);padding:7px 8px;background:var(--panel-alt);}
+  .webhook-box code{font-family:var(--mono);font-size:11.5px;color:var(--accent);flex:1;overflow-x:auto;white-space:nowrap;}
+  .hint{font-size:11.5px;color:var(--text-faint);margin-top:5px;line-height:1.5;}
   .test-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
   .test-result{font-size:12px;display:flex;align-items:center;gap:5px;}
-  .test-result.ok{color:var(--accent-strong);}
+  .test-result.ok{color:var(--ok);}
   .test-result.fail{color:var(--danger);}
-  .divider{border:none;border-top:1px solid var(--line);margin:20px 0;}
-  .danger-zone{border:1px solid var(--danger-bg);background:var(--danger-bg);border-radius:8px;padding:12px 14px;margin-top:22px;}
-  .danger-zone p{font-size:12px;color:var(--ink-2);margin:0 0 8px;}
-  .modal{width:460px;max-width:92vw;background:var(--card);border-radius:14px;padding:22px;margin:auto;}
+  .divider{border:none;border-top:1px solid var(--border-soft);margin:20px 0;}
+  .danger-zone{border:1px solid var(--danger-dim);background:rgba(232,84,106,.08);border-radius:var(--radius);padding:12px 14px;margin-top:22px;}
+  .danger-zone p{font-size:12px;color:var(--text-muted);margin:0 0 8px;}
+  .modal{width:460px;max-width:92vw;background:var(--panel-raised);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin:auto;box-shadow:var(--shadow);}
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
   .modal-head h2{font-size:16px;margin:0;}
-  .modal-sub{font-size:12.5px;color:var(--ink-2);margin:0 0 18px;}
+  .modal-sub{font-size:12.5px;color:var(--text-muted);margin:0 0 18px;}
   .platform-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .pp-option{border:1px solid var(--line);border-radius:10px;padding:14px 12px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .12s,background .12s;position:relative;}
-  .pp-option:hover{border-color:var(--accent);background:var(--accent-bg);}
-  .pp-option .platform-icon{width:30px;height:30px;font-size:15px;}
+  .pp-option{border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 12px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:border-color .12s,background .12s;position:relative;background:var(--panel-alt);}
+  .pp-option:hover{border-color:var(--accent);background:var(--panel-raised);}
+  .pp-option .platform-icon{width:30px;height:30px;}
+  .pp-option .platform-icon .icon{width:15px;height:15px;}
   .pp-option strong{font-size:13px;}
-  .pp-option span{font-size:11.5px;color:var(--ink-2);}
+  .pp-option span{font-size:11.5px;color:var(--text-muted);}
   .pp-option.pp-soon{cursor:not-allowed;opacity:.55;}
-  .pp-option.pp-soon:hover{border-color:var(--line);background:none;}
-  .pp-soon-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:600;color:var(--ink-2);background:var(--line);border-radius:999px;padding:2px 8px;}
+  .pp-option.pp-soon:hover{border-color:var(--border);background:var(--panel-alt);}
+  .pp-soon-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:600;color:var(--text-muted);background:var(--panel-raised);border:1px solid var(--border);border-radius:999px;padding:2px 8px;}
   .form-field{margin-bottom:14px;}
-  .form-field label{font-size:12px;font-weight:500;display:block;margin-bottom:5px;}
-  .form-field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--sans);}
+  .form-field label{font-size:12px;font-weight:500;display:block;margin-bottom:5px;color:var(--text-muted);}
+  .form-field input{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:var(--sans);background:var(--panel-alt);color:var(--text);}
   .form-field input:focus{outline:none;border-color:var(--accent);}
   .form-field.mono input{font-family:var(--mono);font-size:12.5px;}
   .form-field .err{color:var(--danger);font-size:11.5px;margin-top:4px;display:none;}
   .form-field.invalid input{border-color:var(--danger);}
   .form-field.invalid .err{display:block;}
   .modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;}
-  .back-link{font-size:12.5px;color:var(--ink-2);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:4px;padding:0;}
-  .back-link:hover{color:var(--ink);}
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;z-index:80;max-width:80vw;text-align:center;}
+  .back-link{font-size:12.5px;color:var(--text-muted);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:4px;padding:0;}
+  .back-link:hover{color:var(--text);}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel-raised);border:1px solid var(--border);border-left:3px solid var(--ok);color:var(--text);font-size:13px;padding:9px 16px;border-radius:var(--radius);opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;z-index:80;max-width:80vw;text-align:center;box-shadow:var(--shadow);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
-  .toast.err{background:var(--danger);}
+  .toast.err{border-left-color:var(--danger);}
   .spin{animation:spin 1s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 </style>
@@ -137,7 +153,7 @@
     </div>
     <div class="topbar-actions">
       <div class="server-pill" id="server-pill"><span class="dot"></span><span id="server-pill-text">memeriksa…</span></div>
-      <button class="btn btn-primary" onclick="openAddModal()"><i class="ti ti-plus"></i>Tambah agent</button>
+      <button class="btn btn-primary" onclick="openAddModal()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>Tambah agent</button>
     </div>
   </div>
 
@@ -171,6 +187,29 @@
 // ADIT_AGENT_UI_ORIGINS di server dengan origin UI ini (lihat README.md).
 const API_BASE = '/api/agents';
 
+/* ---------- ikon (SVG inline, offline -- tanpa CDN) ---------- */
+const ICON_PATHS = {
+  plus: ['M12 5v14', 'M5 12h14'],
+  x: ['M18 6 6 18', 'M6 6l12 12'],
+  eye: ['M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z', 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
+  'eye-off': ['M3 3l18 18', 'M10.6 10.6a3 3 0 0 0 4.24 4.24', 'M9.9 4.24A11 11 0 0 1 12 4c7 0 11 8 11 8a17.6 17.6 0 0 1-3.06 4.06', 'M6.1 6.1A17.4 17.4 0 0 0 1 12s4 8 11 8a10.8 10.8 0 0 0 4.24-.86'],
+  copy: ['M9 9h10v10H9z', 'M5 15V5h10'],
+  plug: ['M9 2v5', 'M15 2v5', 'M7.5 7h9l-.7 6a4 4 0 0 1-4 3.5 4 4 0 0 1-4-3.5L7.5 7Z', 'M12 16.5V22'],
+  trash: ['M4 7h16', 'M9 7V4h6v3', 'M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13', 'M10 11v6', 'M14 11v6'],
+  loader: ['M12 2v4', 'M12 18v4', 'M4.9 4.9l2.8 2.8', 'M16.3 16.3l2.8 2.8', 'M2 12h4', 'M18 12h4', 'M4.9 19.1l2.8-2.8', 'M16.3 7.7l2.8-2.8'],
+  chevronLeft: ['M15 18l-6-6 6-6'],
+  check: ['M20 6 9 17l-5-5'],
+  messageCircle: ['M21 12a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-3.9-.94L3 21l1.44-4.06A8.4 8.4 0 0 1 3.5 12 8.5 8.5 0 0 1 12 3.5 8.5 8.5 0 0 1 21 12Z'],
+  robot: ['M12 3v3', 'M8 6h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z', 'M9 12h.01', 'M15 12h.01', 'M9 16h6', 'M2 12h2', 'M20 12h2'],
+  telegram: ['M21 4 2.5 11.2c-1.1.4-1.1 1 0 1.4l4.7 1.5 1.8 5.7c.2.6.4.6.8.2l2.6-2.5 5 3.7c.6.4 1.2.2 1.4-.6L21.9 5c.3-1-.2-1.4-.9-1Z', 'M9.5 14.5l9-8.6-11 7.2Z']
+};
+function icon(name){
+  const segs = ICON_PATHS[name] || [];
+  const spin = name === 'loader' ? ' spin' : '';
+  return `<span class="icon${spin}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${segs.map(d=>`<path d="${d}"/>`).join('')}</svg></span>`;
+}
+
+
 let adminToken = null; // diminta lewat prompt() sekali per muat halaman kalau server minta -- sengaja TIDAK disimpan ke localStorage/sessionStorage.
 
 async function apiFetch(path, options = {}) {
@@ -196,17 +235,17 @@ async function apiFetch(path, options = {}) {
 }
 
 const PLATFORMS = {
-  synology_chat: { label:"Synology Chat", icon:"ti-message-circle", cls:"pi-synology_chat",
+  synology_chat: { label:"Synology Chat", icon:"messageCircle", cls:"pi-synology_chat",
     fields:[
       {key:"outgoing_token", label:"Token outgoing webhook", placeholder:"tempel token dari Synology Chat"},
       {key:"incoming_webhook_url", label:"URL incoming webhook", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."}
     ]},
-  synology_bot: { label:"Synology Bot", icon:"ti-robot", cls:"pi-synology_bot",
+  synology_bot: { label:"Synology Bot", icon:"robot", cls:"pi-synology_bot",
     fields:[
       {key:"outgoing_token", label:"Token outgoing webhook", placeholder:"tempel token dari Synology Chat"},
       {key:"incoming_webhook_url", label:"URL webhook Bot (method=chatbot)", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."}
     ]},
-  telegram: { label:"Telegram", icon:"ti-brand-telegram", cls:"pi-telegram", comingSoon:true,
+  telegram: { label:"Telegram", icon:"telegram", cls:"pi-telegram", comingSoon:true,
     fields:[
       {key:"bot_token", label:"Bot token", placeholder:"123456:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},
       {key:"webhook_secret", label:"Secret header webhook", placeholder:"dibuat otomatis atau isi sendiri"}
@@ -261,7 +300,7 @@ function renderGrid(){
     grid.innerHTML = `<div class="empty-state">Belum ada agent. Klik "Tambah agent" untuk menyambungkan Synology Chat atau Synology Bot.</div>`;
   } else {
     agentsCache.forEach(a=>{
-      const p = PLATFORMS[a.platform] || { label: a.platform, icon: 'ti-plug', cls: '' };
+      const p = PLATFORMS[a.platform] || { label: a.platform, icon: 'plug', cls: '' };
       const statusCls = a.active ? 'status-active' : 'status-inactive';
       const statusLabel = a.active ? 'Aktif' : 'Nonaktif';
       const el = document.createElement('div');
@@ -269,7 +308,7 @@ function renderGrid(){
       el.onclick = ()=>openDrawer(a.id);
       el.innerHTML = `
         <div class="card-top">
-          <div class="platform-icon ${p.cls}"><i class="ti ${p.icon}"></i></div>
+          <div class="platform-icon ${p.cls}">${icon(p.icon)}</div>
           <div class="status-row ${statusCls}"><span class="status-dot"></span>${statusLabel}</div>
         </div>
         <h3>${escapeHtml(a.name)}</h3>
@@ -284,7 +323,7 @@ function renderGrid(){
   const addCard = document.createElement('div');
   addCard.className = 'card card-add';
   addCard.onclick = openAddModal;
-  addCard.innerHTML = `<i class="ti ti-plus"></i><span>Tambah agent</span>`;
+  addCard.innerHTML = `${icon('plus')}<span>Tambah agent</span>`;
   grid.appendChild(addCard);
 
   document.getElementById('m-total').textContent = agentsCache.length;
@@ -303,7 +342,7 @@ async function openDrawer(id){
     return;
   }
 
-  const p = PLATFORMS[a.platform] || { label: a.platform, icon: 'ti-plug', cls: '', fields: [] };
+  const p = PLATFORMS[a.platform] || { label: a.platform, icon: 'plug', cls: '', fields: [] };
   const statusCls = a.active ? 'status-active' : 'status-inactive';
   const statusLabel = a.active ? 'Aktif' : 'Nonaktif';
 
@@ -312,7 +351,7 @@ async function openDrawer(id){
       <label class="fg-label">${f.label}</label>
       <div class="secret-input">
         <input type="password" data-field="${f.key}" value="${escapeHtml(a.creds[f.key]||'')}" placeholder="${f.placeholder}">
-        <button class="icon-btn" onclick="toggleSecret(this)" aria-label="Lihat nilai"><i class="ti ti-eye"></i></button>
+        <button class="icon-btn" onclick="toggleSecret(this)" aria-label="Lihat nilai">${icon('eye')}</button>
       </div>
     </div>`).join('');
 
@@ -321,10 +360,10 @@ async function openDrawer(id){
   d.innerHTML = `
     <div class="drawer-head">
       <input class="name-input" value="${escapeHtml(a.name)}" data-role="name">
-      <button class="icon-btn" onclick="closeDrawer()" aria-label="Tutup"><i class="ti ti-x"></i></button>
+      <button class="icon-btn" onclick="closeDrawer()" aria-label="Tutup">${icon('x')}</button>
     </div>
     <div class="badge-row">
-      <span class="badge badge-type"><i class="ti ${p.icon}" style="margin-right:4px;"></i>${p.label}</span>
+      <span class="badge badge-type">${icon(p.icon)} ${p.label}</span>
       <span class="status-row ${statusCls}" style="margin-left:auto;"><span class="status-dot"></span>${statusLabel}</span>
       <div class="toggle ${a.active?'on':''}" id="active-toggle"></div>
     </div>
@@ -333,7 +372,7 @@ async function openDrawer(id){
       <label class="fg-label">URL webhook masuk (daftarkan ini di ${p.label})</label>
       <div class="webhook-box">
         <code id="webhook-url">${escapeHtml(origin + a.webhook_path)}</code>
-        <button class="icon-btn" onclick="copyWebhook()" aria-label="Salin"><i class="ti ti-copy"></i></button>
+        <button class="icon-btn" onclick="copyWebhook()" aria-label="Salin">${icon('copy')}</button>
       </div>
       <p class="hint">Aktif menerima pesan langsung setelah agent disimpan dengan status Aktif — tidak perlu restart proses.</p>
     </div>
@@ -343,13 +382,13 @@ async function openDrawer(id){
     ${fieldsHtml || '<p class="hint">Platform ini belum punya field kredensial terdaftar di UI.</p>'}
 
     <div class="test-row">
-      <button class="btn btn-sm" onclick="testConnection('${a.id}', this)"><i class="ti ti-plug"></i>Tes koneksi</button>
+      <button class="btn btn-sm" onclick="testConnection('${a.id}', this)">${icon('plug')}Tes koneksi</button>
       <span class="test-result" id="test-result"></span>
     </div>
 
     <div class="danger-zone">
       <p>Menghapus agent akan langsung menghentikan pesan masuk dari ${p.label} untuk agent ini. Kredensial ikut terhapus dari database.</p>
-      <button class="btn-danger-text" onclick="deleteAgentUi('${a.id}')"><i class="ti ti-trash" style="margin-right:4px;"></i>Hapus agent</button>
+      <button class="btn-danger-text" onclick="deleteAgentUi('${a.id}')">${icon('trash')} Hapus agent</button>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:20px;">
@@ -364,9 +403,8 @@ function closeDrawer(){ document.getElementById('drawer-overlay').classList.remo
 
 function toggleSecret(btn){
   const input = btn.previousElementSibling;
-  const icon = btn.querySelector('i');
-  if(input.type === 'password'){ input.type='text'; icon.className='ti ti-eye-off'; }
-  else { input.type='password'; icon.className='ti ti-eye'; }
+  if(input.type === 'password'){ input.type='text'; btn.innerHTML = icon('eye-off'); }
+  else { input.type='password'; btn.innerHTML = icon('eye'); }
 }
 function copyWebhook(){
   const code = document.getElementById('webhook-url').textContent;
@@ -376,16 +414,16 @@ function copyWebhook(){
 async function testConnection(id, btn){
   btn.disabled = true;
   const original = btn.innerHTML;
-  btn.innerHTML = '<i class="ti ti-loader-2 spin"></i>Menguji…';
+  btn.innerHTML = icon('loader') + 'Menguji…';
   const result = document.getElementById('test-result');
   result.textContent = '';
   try {
     const res = await apiFetch(`/${id}/test`, { method: 'POST' });
     result.className = 'test-result ' + (res.success ? 'ok' : 'fail');
-    result.innerHTML = `<i class="ti ${res.success ? 'ti-check' : 'ti-x'}"></i> ${escapeHtml(res.detail)}`;
+    result.innerHTML = `${icon(res.success ? 'check' : 'x')} ${escapeHtml(res.detail)}`;
   } catch (e) {
     result.className = 'test-result fail';
-    result.innerHTML = `<i class="ti ti-x"></i> ${escapeHtml(e.message)}`;
+    result.innerHTML = `${icon('x')} ${escapeHtml(e.message)}`;
   } finally {
     btn.disabled = false;
     btn.innerHTML = original;
@@ -434,13 +472,13 @@ function renderModalStep1(){
   const opts = Object.entries(PLATFORMS).map(([key,p])=>`
     <div class="pp-option${p.comingSoon ? ' pp-soon' : ''}" ${p.comingSoon ? '' : `onclick="selectPlatform('${key}')"`}>
       ${p.comingSoon ? '<span class="pp-soon-badge">Segera hadir</span>' : ''}
-      <div class="platform-icon ${p.cls}"><i class="ti ${p.icon}"></i></div>
+      <div class="platform-icon ${p.cls}">${icon(p.icon)}</div>
       <strong>${p.label}</strong>
       <span>${p.comingSoon ? 'Belum bisa disambungkan -- masih dikembangkan' : key==='synology_bot' ? 'Balasan bisa langsung ke pengirim (DM)' : 'Balasan muncul di satu channel tetap'}</span>
     </div>`).join('');
   m.innerHTML = `
     <div class="modal-head"><h2>Tambah agent</h2>
-      <button class="icon-btn" onclick="closeAddModal()" aria-label="Tutup"><i class="ti ti-x"></i></button>
+      <button class="icon-btn" onclick="closeAddModal()" aria-label="Tutup">${icon('x')}</button>
     </div>
     <p class="modal-sub">Pilih layanan chat yang mau disambungkan. Tiap pilihan jadi agent terpisah — boleh lebih dari satu Synology Chat/Bot sekaligus.</p>
     <div class="platform-pick">${opts}</div>
@@ -464,7 +502,7 @@ function renderModalStep2(){
 
   m.innerHTML = `
     <div class="modal-head"><h2>Tambah agent — ${p.label}</h2>
-      <button class="icon-btn" onclick="closeAddModal()" aria-label="Tutup"><i class="ti ti-x"></i></button>
+      <button class="icon-btn" onclick="closeAddModal()" aria-label="Tutup">${icon('x')}</button>
     </div>
     <p class="modal-sub">Kredensial disimpan terenkripsi di adit-agent, hanya dipakai untuk agent ini.</p>
     <div class="form-field" data-key="name">
@@ -482,7 +520,7 @@ function renderModalStep2(){
       <p class="hint">Boleh dibiarkan nonaktif dulu — coba "Tes koneksi" di panel detail setelah disimpan, baru aktifkan.</p>
     </div>
     <div class="modal-actions">
-      <button class="back-link" onclick="renderModalStep1()"><i class="ti ti-chevron-left"></i>Kembali</button>
+      <button class="back-link" onclick="renderModalStep1()">${icon('chevronLeft')}Kembali</button>
       <button class="btn btn-primary" id="submit-new-agent" onclick="submitNewAgent()">Simpan & sambungkan</button>
     </div>
   `;

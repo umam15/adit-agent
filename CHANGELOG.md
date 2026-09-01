@@ -9,6 +9,22 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-02
+
+### Diubah
+- Panel admin (`app/web/index.html`) memakai tema **adit-admin**: latar
+  gelap, aksen gold, font mono/sans yang sama seperti dashboard
+  `adit-admin`, supaya seluruh panel admin adit-* konsisten satu tampilan.
+  Fungsi dan alur kerja panel tidak berubah, hanya tampilannya.
+- Font ikon dari CDN eksternal (cdnjs.cloudflare.com) dihapus, diganti
+  ikon SVG bawaan yang ditulis langsung di halaman -- panel admin sekarang
+  bisa dibuka sepenuhnya tanpa koneksi internet.
+- `docs/screenshots/admin-dashboard.png` diperbarui supaya sesuai tema baru.
+
+### Ditambahkan
+- File `VERSION` di root proyek jadi satu-satunya sumber nomor versi;
+  `app/__init__.py` membacanya saat start, tidak lagi hardcode string versi.
+
 ## [0.5.2] - 2026-09-01
 
 ### Ditambahkan
