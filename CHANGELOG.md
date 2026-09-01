@@ -9,6 +9,13 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-09-01
+
+### Ditambahkan
+- `README.md`: screenshot panel admin (`docs/screenshots/admin-dashboard.png`)
+  supaya calon pengguna bisa lihat tampilannya sebelum instalasi. Data yang
+  ditampilkan di screenshot adalah data contoh, bukan data server sungguhan.
+
 ## [0.5.1] - 2026-09-01
 
 ### Ditambahkan

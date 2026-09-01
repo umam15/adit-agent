@@ -9,6 +9,10 @@ Semua pengaturan channel chat — token, URL, aktif/nonaktif — dikelola
 lewat satu **panel admin di browser**, tidak perlu edit file konfigurasi
 apa pun untuk itu.
 
+![Panel admin adit-agent](docs/screenshots/admin-dashboard.png)
+
+*Contoh tampilan panel admin dengan data contoh (bukan data server sungguhan).*
+
 ## Jalankan
 
 ```bash
