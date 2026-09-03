@@ -163,6 +163,14 @@
 
 ## Prioritas tinggi (temuan lain, non-kritis)
 
+- [ ] **Field "matikan verifikasi SSL" belum ada di panel admin**: backend
+  sudah dukung (`verify_ssl` di `creds`, `SynologyChatBot`), tapi belum ada
+  toggle-nya di `app/web/index.html` -- baru bisa diisi manual lewat
+  `PATCH /api/agents/<id>`. Ditemukan 2026-09-03 saat cek dokumentasi
+  (`docs/channels/synology-chat.md` sempat salah klaim tombol ini ada,
+  sudah dikoreksi). Kalau dikerjakan: field checkbox biasa (bukan secret),
+  pola render-nya sama seperti `ack_message` (lihat 0.6.2, `type:"text"`
+  di `PLATFORMS.<key>.fields` -- untuk checkbox butuh `type:"checkbox"` baru).
 - [ ] **Verifikasi live end-to-end**: jalankan Synology Chat asli → `adit-agent`
   → server adit sungguhan sekali penuh (belum sempat di lingkungan
   pengembangan ini karena keterbatasan sandbox, lihat `docs/architecture.md`).

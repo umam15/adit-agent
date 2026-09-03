@@ -9,6 +9,18 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-09-03
+
+### Fixed
+- `docs/channels/synology-chat.md`: klaim "panel admin punya opsi matikan
+  verifikasi SSL" **tidak akurat** -- field `verify_ssl` didukung backend
+  tapi belum ada toggle-nya di UI. Dikoreksi + dicatat cara isi manual
+  lewat API, dan ditambahkan sebagai item TODO baru.
+- Dikonfirmasi (dijalankan langsung, bukan cuma baca kode):
+  `reply_to_user` otomatis `True` untuk platform "Synology Bot" apa pun
+  isi `creds`-nya -- tombol "Tambah agent → Synology Bot" di panel sudah
+  benar, tidak perlu field UI tambahan untuk `reply_to_user`.
+
 ## [0.6.2] - 2026-09-03
 
 ### Ditambahkan

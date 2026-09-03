@@ -52,10 +52,15 @@ khusus untuk agent ini. **Kosongkan** kalau mau tetap pakai pesan default.
 ## Sertifikat self-signed
 
 Kalau NAS kamu memakai sertifikat self-signed (bukan dari Let's Encrypt
-atau CA publik), pesan mungkin gagal terkirim karena verifikasi SSL. Panel
-admin punya opsi "matikan verifikasi SSL" untuk kasus ini — hanya aktifkan
-kalau kamu memang tahu NAS-nya memakai sertifikat self-signed dan berada
-di jaringan yang kamu percaya.
+atau CA publik), pesan mungkin gagal terkirim karena verifikasi SSL --
+adit-agent secara default **selalu memverifikasi** sertifikat tujuan.
+
+Panel admin **belum punya tombol** untuk mematikan ini (`verify_ssl` di
+backend bisa diisi `false`, tapi belum ada field-nya di UI). Kalau memang
+butuh, kamu bisa set manual lewat API panel (`PATCH /api/agents/<id>`,
+tambahkan `"verify_ssl": false` ke object `creds`) -- solusi yang lebih
+aman untuk jangka panjang tetap pasang sertifikat resmi (mis. lewat
+reverse-proxy dengan Let's Encrypt) daripada mematikan verifikasi SSL.
 
 ## Setelah diisi
 
