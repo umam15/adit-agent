@@ -24,6 +24,12 @@ TODO.md, laporan pengujian 2026-08-22 M3): payload ke URL Bot
 (`method=chatbot`) wajib menyertakan `user_ids`, dan sebelum ini tidak ada
 jalur apa pun yang membuat `reply_to_user` bernilai `true` secara otomatis
 -- request tetap sukses (HTTP 200) tapi pesan tidak sampai ke siapa pun.
+
+v0.6.2: `config["ack_message"]` (opsional, per-agent, diisi lewat panel
+admin) -- kalau diisi, dipakai sebagai pesan ACK instan untuk agent ini
+saja, menimpa default global `settings.ack_message` (`ADIT_ACK_MESSAGE`).
+Kosong/tidak diisi = tetap pakai default global, perilaku identik versi
+sebelumnya.
 """
 from __future__ import annotations
 
@@ -65,6 +71,11 @@ class SynologyAdapter(ChannelAdapter):
             # tetap harus menang, bukan dihormati.
             config["reply_to_user"] = True
 
+        # Pesan ACK per-agent (opsional) -- string kosong/tidak diisi berarti
+        # pakai default global `settings.ack_message` (ADIT_ACK_MESSAGE).
+        # Lihat ack_response() di bawah & TODO.md "Pesan ACK bisa custom".
+        self._ack_message = (config.get("ack_message") or "").strip() or None
+
         self._listener = SynologyChatListener(config, channel_id=agent_id)
         self._bot = SynologyChatBot(config)
 
@@ -72,7 +83,7 @@ class SynologyAdapter(ChannelAdapter):
         return await self._listener.parse_request(request)
 
     def ack_response(self, message: IncomingMessage):
-        return {"text": settings.ack_message}
+        return {"text": self._ack_message or settings.ack_message}
 
     def reject_response(self):
         return {"text": ""}

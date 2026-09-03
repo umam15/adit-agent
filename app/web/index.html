@@ -238,12 +238,16 @@ const PLATFORMS = {
   synology_chat: { label:"Synology Chat", icon:"messageCircle", cls:"pi-synology_chat",
     fields:[
       {key:"outgoing_token", label:"Token outgoing webhook", placeholder:"tempel token dari Synology Chat"},
-      {key:"incoming_webhook_url", label:"URL incoming webhook", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."}
+      {key:"incoming_webhook_url", label:"URL incoming webhook", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."},
+      {key:"ack_message", label:"Pesan ACK (opsional)", placeholder:"Kosongkan untuk pakai default global", optional:true, type:"text",
+        hint:"Balasan instan yang muncul sebelum jawaban asli dikirim. Kosongkan untuk pakai pesan default (ADIT_ACK_MESSAGE)."}
     ]},
   synology_bot: { label:"Synology Bot", icon:"robot", cls:"pi-synology_bot",
     fields:[
       {key:"outgoing_token", label:"Token outgoing webhook", placeholder:"tempel token dari Synology Chat"},
-      {key:"incoming_webhook_url", label:"URL webhook Bot (method=chatbot)", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."}
+      {key:"incoming_webhook_url", label:"URL webhook Bot (method=chatbot)", placeholder:"https://nas-anda.synology.me/webapi/entry.cgi?..."},
+      {key:"ack_message", label:"Pesan ACK (opsional)", placeholder:"Kosongkan untuk pakai default global", optional:true, type:"text",
+        hint:"Balasan instan yang muncul sebelum jawaban asli dikirim. Kosongkan untuk pakai pesan default (ADIT_ACK_MESSAGE)."}
     ]},
   telegram: { label:"Telegram", icon:"telegram", cls:"pi-telegram", comingSoon:true,
     fields:[
@@ -346,14 +350,24 @@ async function openDrawer(id){
   const statusCls = a.active ? 'status-active' : 'status-inactive';
   const statusLabel = a.active ? 'Aktif' : 'Nonaktif';
 
-  const fieldsHtml = p.fields.map(f=>`
+  const fieldsHtml = p.fields.map(f=>{
+    if (f.type === 'text') {
+      return `
+    <div class="field-group">
+      <label class="fg-label">${f.label}</label>
+      <input type="text" data-field="${f.key}" value="${escapeHtml(a.creds[f.key]||'')}" placeholder="${f.placeholder}">
+      ${f.hint ? `<p class="hint">${f.hint}</p>` : ''}
+    </div>`;
+    }
+    return `
     <div class="field-group">
       <label class="fg-label">${f.label}</label>
       <div class="secret-input">
         <input type="password" data-field="${f.key}" value="${escapeHtml(a.creds[f.key]||'')}" placeholder="${f.placeholder}">
         <button class="icon-btn" onclick="toggleSecret(this)" aria-label="Lihat nilai">${icon('eye')}</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   const origin = window.location.origin;
   const d = document.getElementById('drawer');
@@ -494,10 +508,10 @@ function renderModalStep2(){
   const p = PLATFORMS[newAgentPlatform];
   const m = document.getElementById('modal');
   const fieldsHtml = p.fields.map(f=>`
-    <div class="form-field mono" data-key="${f.key}">
+    <div class="form-field${f.type==='text'?'':' mono'}" data-key="${f.key}" ${f.optional?'data-optional="true"':''}>
       <label>${f.label}</label>
       <input type="text" placeholder="${f.placeholder}">
-      <div class="err">Wajib diisi.</div>
+      ${f.optional ? `<p class="hint">${f.hint||''}</p>` : '<div class="err">Wajib diisi.</div>'}
     </div>`).join('');
 
   m.innerHTML = `
@@ -533,7 +547,8 @@ async function submitNewAgent(){
   fields.forEach(f=>{
     const input = f.querySelector('input');
     const key = f.dataset.key;
-    if(!input.value.trim()){
+    const optional = f.dataset.optional === 'true';
+    if(!input.value.trim() && !optional){
       f.classList.add('invalid');
       valid = false;
     } else {

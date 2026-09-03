@@ -4,7 +4,7 @@ Panduan ini untuk mengisi **panel admin** (`/admin`) saat menambah agent
 bertipe Synology Chat atau Synology Bot. Semua kredensial di bawah diisi
 lewat UI — tidak ada file `.env` yang perlu disentuh untuk ini.
 
-## Dua field yang diminta panel, dan dari mana asalnya
+## Field yang diminta panel, dan dari mana asalnya
 
 ### 1. Token outgoing webhook
 
@@ -40,6 +40,14 @@ tersebut ke field **"URL webhook Bot"**.
 > untuk dua kasus ini — kalau salah pilih, request bisa sukses (HTTP 200)
 > tapi pesannya tidak pernah sampai ke siapa pun. Memisahkan pilihannya di
 > panel mencegah campur-aduk dua konfigurasi ini secara tidak sengaja.
+
+### 3. Pesan ACK (opsional)
+
+Begitu pesan masuk, adit-agent langsung membalas satu pesan instan
+("sedang mikir…" secara default) sebelum jawaban asli dari server adit
+selesai diproses — supaya pengirim tahu pesannya sudah diterima, bukan
+diam saja. Field **"Pesan ACK"** di panel membiarkan kamu ganti teks itu
+khusus untuk agent ini. **Kosongkan** kalau mau tetap pakai pesan default.
 
 ## Sertifikat self-signed
 

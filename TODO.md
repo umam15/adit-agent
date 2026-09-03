@@ -5,6 +5,15 @@
 > (pengujian penerapan 0.4.2 → 0.4.4 + verifikasi end-to-end Synology Chat
 > asli). Baca laporan itu untuk log mentah & konteks lengkap tiap temuan.
 
+## Selesai di 0.6.2
+
+- [x] **Pesan ACK bisa custom per-agent** — lihat `CHANGELOG.md` 0.6.2.
+  Diimplementasikan lebih sederhana dari rencana awal di bawah: field
+  `ack_message` masuk ke `creds` (dict yang sama dengan kredensial lain),
+  BUKAN kolom terpisah di tabel `agents` -- tidak perlu migrasi skema
+  database sama sekali, konsisten dengan pola field per-platform yang
+  sudah ada (`incoming_webhook_url`, `reply_to_user`, dst).
+
 ## Selesai di 0.6.1
 
 - [x] **`depends_on` di `docker-compose.yml` dihapus** — lihat
@@ -119,14 +128,6 @@
 
 ## Prioritas tinggi
 
-- [ ] **Pesan ACK bisa custom**: saat ini `ADIT_ACK_MESSAGE` satu nilai
-  global lewat env var (`app/config.py`, dipakai `SynologyAdapter.ack_response()`).
-  Field "Pesan ACK" per-agent di form tambah/edit (kolom `ack_message`
-  nullable di tabel `agents`, `app/store.py` — `NULL` berarti pakai
-  default global), dengan default global itu sendiri ikut jadi salah satu
-  "runtime setting" yang bisa diedit dari panel (lihat item "Runtime
-  settings" di bawah, bukan halaman "Pengaturan" umum).
-
 - [ ] **Runtime settings di panel admin — bukan halaman "Pengaturan"
   umum, dan bukan tempat mengedit token admin**: pisahkan berdasarkan
   sifatnya, bukan digabung rata:
@@ -148,7 +149,9 @@
     restart** (dipakai ulang tiap request, tidak mengikat resource apa
     pun saat start): `ADIT_BASE_URL`, `ADIT_API_KEY`, `ADIT_MAX_TOKENS`,
     `ADIT_TEMPERATURE`, `ADIT_TOP_K`, `ADIT_REQUEST_TIMEOUT`, pesan ACK
-    global (lihat item di atas). Simpan di tabel key-value baru
+    global (default-nya sendiri, `ADIT_ACK_MESSAGE` -- beda dari pesan ACK
+    per-agent yang sudah bisa diedit lewat panel sejak 0.6.2, lihat
+    `CHANGELOG.md`). Simpan di tabel key-value baru
     (`app/store.py`, field sensitif seperti `ADIT_API_KEY` tetap
     dienkripsi sama seperti kredensial channel), endpoint
     `GET/PATCH /api/settings`. `app/config.py` perlu pola yang sama

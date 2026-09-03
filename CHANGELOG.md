@@ -9,6 +9,17 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-09-03
+
+### Ditambahkan
+- **Pesan ACK bisa custom per-agent**: field opsional `ack_message` di
+  kredensial agent (Synology Chat & Synology Bot) -- kosong berarti tetap
+  pakai default global `ADIT_ACK_MESSAGE`. Diisi lewat panel admin (field
+  teks biasa, bukan password-masked, karena bukan rahasia); disimpan di
+  `creds` terenkripsi yang sama dengan kredensial lain -- tidak ada
+  migrasi skema database. `app/channels/synology.py`
+  (`SynologyAdapter._ack_message`, `ack_response()`), `app/web/index.html`.
+
 ## [0.6.1] - 2026-09-03
 
 ### Diubah
