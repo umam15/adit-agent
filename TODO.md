@@ -5,6 +5,14 @@
 > (pengujian penerapan 0.4.2 → 0.4.4 + verifikasi end-to-end Synology Chat
 > asli). Baca laporan itu untuk log mentah & konteks lengkap tiap temuan.
 
+## Selesai di 0.6.1
+
+- [x] **`depends_on` di `docker-compose.yml` dihapus** — lihat
+  `CHANGELOG.md` 0.6.1. Tidak sesuai standar (service `adit` tidak punya
+  image publik, dan `depends_on` cuma nunggu kontainer dibuat, bukan
+  server siap) -- koneksi antar service sudah cukup lewat nama service
+  langsung.
+
 ## Selesai di 0.6.0
 
 - [x] **Tema panel admin diseragamkan dengan `adit-admin`** — lihat

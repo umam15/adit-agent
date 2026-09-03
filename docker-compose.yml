@@ -41,9 +41,9 @@ services:
       ADIT_BASE_URL: http://${ADIT_SERVER_HOST}:${ADIT_SERVER_PORT}
     ports:
       - "${AGENT_PORT}:9000"   # publik-facing -- buat webhook Synology
-    # CATATAN: "adit" di bawah ini merujuk ke KEY service di atas (baris
-    # "adit:"), bukan ke nilai ADIT_SERVER_HOST -- docker-compose tidak
-    # mendukung variable di posisi ini, jadi key ini tetap literal secara
-    # sengaja (sama seperti di adit-console/adit-chat).
-    depends_on:
-      - adit
+    # TIDAK ada "depends_on" di sini secara sengaja -- "adit" cuma punya
+    # "build:" (bukan image publik), dan depends_on toh cuma nunggu
+    # kontainer dibuat, bukan servernya siap. Koneksi ke "adit" sudah
+    # langsung lewat nama service (ADIT_BASE_URL di atas); kalau "adit"
+    # belum siap saat agent start, request pertama akan gagal dengan pesan
+    # error yang jelas (lihat app/adit_client.py) -- bukan silent hang.

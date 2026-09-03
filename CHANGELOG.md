@@ -9,6 +9,16 @@ setiap rilis minor.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-09-03
+
+### Diubah
+- `docker-compose.yml`: `depends_on` pada service `agent` dihapus -- service
+  `adit` cuma punya `build:` (bukan image publik), jadi `depends_on` tidak
+  menjamin server sudah siap, hanya kontainer sudah dibuat. Koneksi ke
+  `adit` sudah langsung lewat nama service (`ADIT_BASE_URL`), dan
+  `app/adit_client.py` sudah melempar pesan error yang jelas kalau `adit`
+  belum siap saat request pertama masuk.
+
 ## [0.6.0] - 2026-09-02
 
 ### Diubah
